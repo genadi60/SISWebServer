@@ -1,4 +1,4 @@
-﻿namespace Services
+﻿namespace CakesWebApp.Services
 {
     using System;
     using System.IO;
@@ -7,8 +7,6 @@
 
     public class UserCookieService : IUserCookieService
     {
-        //<Guid("1B611351-E62C-460D-9D9C-14F3306F18A5")>
-        //<Guid("7B467B3D-C9A0-43C6-A536-0F42893B6045")>
         private const string EncryptKey = "E746C8DF278CD5931069B522E695D4F2";
         public string GetUserCookie(string userName)
         {

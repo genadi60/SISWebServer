@@ -6,8 +6,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\SIS.HTTP\SIS.HTTP.csproj" />
-    <ProjectReference Include="..\SIS.WebServer\SIS.WebServer.csproj" />
+    <ProjectReference Include="..\..\..\SIS.WebServer\SIS.WebServer.csproj" />
   </ItemGroup>
 
 </Project>

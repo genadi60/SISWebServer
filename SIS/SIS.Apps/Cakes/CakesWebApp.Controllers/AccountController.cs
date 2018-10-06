@@ -1,17 +1,19 @@
-﻿using System;
-using System.Linq;
-using CakesWebApp.Models;
-using Services;
-using SIS.HTTP.Common;
-using SIS.HTTP.Cookies;
+﻿using System.Text;
 using SIS.HTTP.Enums;
-using SIS.HTTP.Requests.Contracts;
-using SIS.HTTP.Responses;
-using SIS.HTTP.Responses.Contracts;
-using SIS.WebServer.Results;
 
 namespace CakesWebApp.Controllers
 {
+    using System;
+    using System.Linq;
+
+    using Models;
+    using Services;
+    using SIS.HTTP.Common;
+    using SIS.HTTP.Cookies;
+    using SIS.HTTP.Requests.Contracts;
+    using SIS.HTTP.Responses.Contracts;
+    using SIS.WebServer.Results;
+
     public class AccountController : BaseController
     {
         private IHashService _hashService;
@@ -25,7 +27,7 @@ namespace CakesWebApp.Controllers
 
         public IHttpResponse Register(IHttpRequest request)
         {
-            return View("Register");
+            return View("register");
         }
 
         public IHttpResponse DoRegister(IHttpRequest request)
@@ -92,7 +94,7 @@ namespace CakesWebApp.Controllers
 
         public IHttpResponse Login(IHttpRequest request)
         {
-            return View("Login");
+            return View("login");
         }
 
         public IHttpResponse DoLogin(IHttpRequest request)
@@ -134,6 +136,34 @@ namespace CakesWebApp.Controllers
             response.Cookies.Add(cookie);
 
             return response;
+        }
+
+        public IHttpResponse GetProfile(IHttpRequest request)
+        {
+            var userName = GetUserName(request);
+
+            if (userName == null)
+            {
+                return new RedirectResult("/");
+            }
+
+            var user = Db.Users.FirstOrDefault(u => u.Username.Equals(userName));
+
+            if (user == null)
+            {
+                return new RedirectResult("/");
+            }
+
+            var registrationDate = user.DateOfRegistration.ToString("dd-MM-yyyy");
+            var ordersCount = user.Orders.Count;
+
+            string content = $"<p>Name: {userName}</p>" +
+                             $"<p>Registered on: {registrationDate}</p>" +
+                             $"<p>Orders Count: {ordersCount}</p>";
+            var viewContent = Encoding.UTF8.GetString(View("profile").Content);
+            var resultContent = viewContent.Replace("@ProfileData", content);
+
+            return new HtmlResult(resultContent, HttpResponseStatusCode.OK);
         }
     }
 }

@@ -5,8 +5,8 @@
 
     using Controllers;
     using HTTP.Enums;
-    using WebServer;
     using WebServer.Routing;
+    using WebServer;
 
     public class Launcher
     {
@@ -18,7 +18,7 @@
 
             routingTable.Routes[HttpRequestMethod.GET]["/"] = request => new HomeController().Index();
             
-            new Server(80, routingTable).Run();
+            new Server(8000, routingTable).Run();
         }
     }
 }

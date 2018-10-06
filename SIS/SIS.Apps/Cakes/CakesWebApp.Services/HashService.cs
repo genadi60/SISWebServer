@@ -1,4 +1,4 @@
-﻿namespace Services
+﻿namespace CakesWebApp.Services
 {
     using System;
     using System.Security.Cryptography;
