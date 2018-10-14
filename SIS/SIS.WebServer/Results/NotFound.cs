@@ -8,7 +8,7 @@
     
     public class NotFound
     {
-        public IHttpResponse PageNotFound()
+        public static IHttpResponse PageNotFound()
         {
             string content = string.Format(GlobalConstants.NotFoundPage, DateTime.UtcNow.ToString("R"));
 

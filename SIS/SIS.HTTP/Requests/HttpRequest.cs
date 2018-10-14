@@ -49,6 +49,42 @@
        
         private bool IsValidRequestQueryString(string queryString, string[] queryParameters) 
             => !string.IsNullOrEmpty(queryString) && queryParameters.Length >= 1;
+
+        private void ParseRequest(string requestString)
+        {
+            var splitRequestContent = requestString
+                .Split(new []{Environment.NewLine}, StringSplitOptions.None)
+                .ToArray();
+
+            var requestLine = splitRequestContent
+                .First()
+                .Trim()
+                .Split(' ', StringSplitOptions.RemoveEmptyEntries)
+                .ToArray();
+
+            if (!IsValidRequestLine(requestLine))
+            {
+                throw new BadRequestException();
+            }
+
+            ParseRequestMethod(requestLine);
+
+            ParseRequestUrl(requestLine);
+
+            ParseRequestPath();
+
+            var requestHeaders = splitRequestContent
+                .Skip(1)
+                .ToArray();
+
+            ParseHeaders(requestHeaders);
+
+            ParseCookies();
+
+            var formData = requestHeaders.Last();
+
+            ParseRequestParameters(formData);
+        }
         
         private void ParseRequestMethod(string[] requestLine)
         {
@@ -100,69 +136,6 @@
             }
         }
 
-        private void ParseQueryParameters()
-        {
-            if (!Url.Contains('?'))
-            {
-                return;
-            }
-
-            var queryString = Url
-                .Split(new[] {'?'}, StringSplitOptions.RemoveEmptyEntries)
-                .Last();
-            ParseQuery(queryString, QueryData);
-            
-        }
-
-        private void ParseFormDataParameters(string formData)
-        {
-            ParseQuery(formData, FormData);
-        }
-
-        private void ParseRequestParameters(string formData)
-        {
-            ParseQueryParameters();
-
-            if (RequestMethod == HttpRequestMethod.GET)
-            {
-                return;
-            }
-
-            ParseFormDataParameters(formData);
-        }
-
-        private void ParseRequest(string requestString)
-        {
-            var splitRequestContent = requestString
-                .Split(new []{Environment.NewLine}, StringSplitOptions.None)
-                .ToArray();
-
-            var requestLine = splitRequestContent
-                .First()
-                .Trim()
-                .Split(' ', StringSplitOptions.RemoveEmptyEntries)
-                .ToArray();
-
-            if (!IsValidRequestLine(requestLine))
-            {
-                throw new BadRequestException();
-            }
-
-            ParseRequestMethod(requestLine);
-            ParseRequestUrl(requestLine);
-            ParseRequestPath();
-
-            var requestHeaders = splitRequestContent
-                .Skip(1)
-                .ToArray();
-            ParseHeaders(requestHeaders);
-            ParseCookies();
-
-            var formData = requestHeaders
-                .Last();
-            ParseRequestParameters(formData);
-        }
-
         private void ParseCookies()
         {
             if (Headers.ContainsHeader(GlobalConstants.HeaderCookieKey))
@@ -197,6 +170,38 @@
                     Cookies.Add(httpCookie);
                 }
             }
+        }
+
+        private void ParseRequestParameters(string formData)
+        {
+            ParseQueryParameters();
+
+            if (RequestMethod == HttpRequestMethod.GET)
+            {
+                return;
+            }
+
+            ParseFormDataParameters(formData);
+        }
+
+        private void ParseQueryParameters()
+        {
+            if (!Url.Contains('?'))
+            {
+                return;
+            }
+
+            var queryString = Url
+                .Split(new[] {'?'}, StringSplitOptions.RemoveEmptyEntries)
+                .Last();
+
+            ParseQuery(queryString, QueryData);
+            
+        }
+
+        private void ParseFormDataParameters(string formData)
+        {
+            ParseQuery(formData, FormData);
         }
 
         private void ParseQuery(string queryString, Dictionary<string, object> dictionary)

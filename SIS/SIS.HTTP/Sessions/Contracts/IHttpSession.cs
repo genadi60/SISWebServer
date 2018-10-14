@@ -6,6 +6,8 @@
 
         object GetParameter(string name);
 
+        T GetParameter<T>(string key);
+
         bool ContainsParameter(string name);
 
         void AddParameter(string name, object parameter);

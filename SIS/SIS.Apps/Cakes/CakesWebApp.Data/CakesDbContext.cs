@@ -24,9 +24,8 @@
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
-            optionsBuilder
-                .UseSqlServer("Server=.;Database=Cakes;Integrated Security=True;")
-                .UseLazyLoadingProxies();
+            optionsBuilder.UseSqlServer("Server=.;Database=Cakes;Integrated Security=True;");
+            optionsBuilder.UseLazyLoadingProxies();
         }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)

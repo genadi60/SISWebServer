@@ -29,10 +29,13 @@
         }
 
         public HttpResponseStatusCode StatusCode { get; set; }
+
         public IHttpHeaderCollection Headers { get; }
 
         public IHttpCookieCollection Cookies { get; private set; }
+
         public byte[] Content { get; set; }
+
         public void AddHeader(HttpHeader header)
         {
             Headers.Add(header);
@@ -57,7 +60,7 @@
 
         public override string ToString()
         {
-            bool isContent = Content.Length > 0;
+            bool existsContent = Content.Length > 0;
 
             var sb = new StringBuilder();
 
@@ -74,7 +77,7 @@
                 
             }
 
-            if (isContent)
+            if (existsContent)
             {
                 sb.Append($"{GlobalConstants.ContentLength}{Content.Length}{Environment.NewLine}");
             }

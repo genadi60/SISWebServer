@@ -1,0 +1,12 @@
+﻿<h1>Your Cart</h1>
+<form method="get" action="/search">
+   <a class="btn" href="/search">Search more cakes</a>
+</form>
+<br />
+{{{cartItems}}}
+<hr />
+Total Cost: ${{{totalCost}}}
+<hr />
+<form method="post" action="/shopping/order">
+    <input class="btn btn-outline-primary" type="submit" value="Finish Order" />
+</form>

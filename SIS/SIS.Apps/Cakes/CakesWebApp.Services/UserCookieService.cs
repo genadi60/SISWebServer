@@ -5,6 +5,9 @@
     using System.Security.Cryptography;
     using System.Text;
 
+    using Contracts;
+
+
     public class UserCookieService : IUserCookieService
     {
         private const string EncryptKey = "E746C8DF278CD5931069B522E695D4F2";

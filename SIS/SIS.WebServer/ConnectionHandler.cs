@@ -1,12 +1,15 @@
 ﻿namespace SIS.WebServer
 {
     using System;
+    using System.Linq;
     using System.Net.Sockets;
     using System.Text;
+    using System.Text.RegularExpressions;
     using System.Threading.Tasks;
 
     using HTTP.Common;
     using HTTP.Cookies;
+    using HTTP.Enums;
     using HTTP.Requests;
     using HTTP.Requests.Contracts;
     using HTTP.Responses.Contracts;
@@ -18,18 +21,18 @@
     {
         private readonly Socket _client;
 
-        private readonly ServerRoutingTable _routingTable;
-        
-        public ConnectionHandler(Socket client, ServerRoutingTable routingTable)
+        private readonly ServerRoutingTable _serverRoutingTable;
+
+        public ConnectionHandler(Socket client, ServerRoutingTable serverRoutingTable)
         {
             _client = client;
-            _routingTable = routingTable;
+            _serverRoutingTable = serverRoutingTable;
         }
 
         public async Task ProcessRequestAsync()
         {
             var httpRequest = await ReadRequest();
-            
+
             if (httpRequest != null)
             {
                 string sessionId = SetRequestSession(httpRequest);
@@ -60,7 +63,7 @@
 
                 var requestText = Encoding.UTF8.GetString(buffer.Array, 0, readLength);
                 sb.Append(requestText);
-                
+
                 if (readLength < 1023)
                 {
                     break;
@@ -82,24 +85,62 @@
 
         private IHttpResponse HandleRequest(IHttpRequest httpRequest)
         {
-            if (!_routingTable.Routes.ContainsKey(httpRequest.RequestMethod) 
-                || !_routingTable.Routes[httpRequest.RequestMethod].ContainsKey(httpRequest.Path))
-            {
-                return new NotFound().PageNotFound();
-            }
-            var response = _routingTable.Routes[httpRequest.RequestMethod][httpRequest.Path].Invoke(httpRequest);
             
+            var parsedPath = ParseRoute(httpRequest);
+
+            if (!_serverRoutingTable.Routes.ContainsKey(httpRequest.RequestMethod)
+                || !_serverRoutingTable.Routes[httpRequest.RequestMethod].ContainsKey(parsedPath))
+            {
+                return NotFound.PageNotFound();
+            }
+            var response = _serverRoutingTable.Routes[httpRequest.RequestMethod][parsedPath].Invoke(httpRequest);
+
             return response;
+        }
+
+        private string ParseRoute(IHttpRequest httpRequest)
+        {
+            var httpRequestPath = httpRequest.Path;
+            var parsedRegex = new StringBuilder();
+
+            ParsePath(httpRequest.RequestMethod, httpRequestPath, parsedRegex);
+
+            return parsedRegex.ToString().Trim();
+        }
+
+        private void ParsePath(HttpRequestMethod requestMethod, string httpRequestPath, StringBuilder parsedRegex)
+        {
+            var availableRoutes = _serverRoutingTable.Routes
+                    .Where(k => k.Key.Equals(requestMethod))
+                    .Select(k => k.Value)
+                    .Select(v => v.Keys)
+                    .ToList();
+
+            foreach (var routes in availableRoutes)
+            {
+                foreach (var route in routes)
+                {
+                    string pattern = $"^{route}$";
+                    var regex = new Regex(pattern);
+                    var match = regex.Match(httpRequestPath);
+
+                    if (!match.Success)
+                    {
+                        continue;
+                    }
+
+                    parsedRegex.Append(route);
+                }
+            }
         }
 
         private async Task PrepareResponse(IHttpResponse httpResponse)
         {
             if (httpResponse != null)
             {
-                //var responseText = httpResponse.ToString();
                 var responseBytes = httpResponse.GetBytes();
                 var byteSegments = new ArraySegment<byte>(responseBytes);
-                
+
                 await _client.SendAsync(byteSegments, SocketFlags.None);
 
                 Console.WriteLine("----RESPONSE----");
@@ -132,11 +173,11 @@
         {
             if (sessionId != null)
             {
-                if (!httpResponse.Cookies.ContainsCookie(GlobalConstants.SessionCookieKey) 
+                if (!httpResponse.Cookies.ContainsCookie(GlobalConstants.SessionCookieKey)
                     && !httpRequest.Cookies.ContainsCookie(GlobalConstants.SessionCookieKey))
                 {
                     httpResponse.Cookies
-                        .Add(new HttpCookie(GlobalConstants.SessionCookieKey, 
+                        .Add(new HttpCookie(GlobalConstants.SessionCookieKey,
                             $"{sessionId}; {GlobalConstants.HttpOnly}"));
                 }
             }

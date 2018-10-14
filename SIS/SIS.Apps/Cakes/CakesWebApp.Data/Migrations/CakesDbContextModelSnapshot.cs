@@ -46,11 +46,15 @@ namespace CakesWebApp.Data.Migrations
 
                     b.Property<int>("ProductId");
 
+                    b.Property<int?>("UserId");
+
                     b.HasKey("Id");
 
                     b.HasIndex("OrderId");
 
                     b.HasIndex("ProductId");
+
+                    b.HasIndex("UserId");
 
                     b.ToTable("OrderProducts");
                 });
@@ -94,7 +98,7 @@ namespace CakesWebApp.Data.Migrations
             modelBuilder.Entity("CakesWebApp.Models.Order", b =>
                 {
                     b.HasOne("CakesWebApp.Models.User", "User")
-                        .WithMany("Orders")
+                        .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade);
                 });
@@ -102,14 +106,18 @@ namespace CakesWebApp.Data.Migrations
             modelBuilder.Entity("CakesWebApp.Models.OrderProduct", b =>
                 {
                     b.HasOne("CakesWebApp.Models.Order", "Order")
-                        .WithMany("OrderProducts")
+                        .WithMany("Products")
                         .HasForeignKey("OrderId")
                         .OnDelete(DeleteBehavior.Cascade);
 
                     b.HasOne("CakesWebApp.Models.Product", "Product")
-                        .WithMany("OrderProducts")
+                        .WithMany("Orders")
                         .HasForeignKey("ProductId")
                         .OnDelete(DeleteBehavior.Cascade);
+
+                    b.HasOne("CakesWebApp.Models.User")
+                        .WithMany("Orders")
+                        .HasForeignKey("UserId");
                 });
 #pragma warning restore 612, 618
         }
