@@ -10,11 +10,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\..\SIS.HTTP\SIS.HTTP.csproj" />
-    <ProjectReference Include="..\..\..\SIS.WebServer\SIS.WebServer.csproj" />
+    <ProjectReference Include="..\..\..\SIS.MvcFramework\SIS.MvcFramework.csproj" />
     <ProjectReference Include="..\CakesWebApp.Controllers\CakesWebApp.Controllers.csproj" />
-    <ProjectReference Include="..\CakesWebApp.Data\CakesWebApp.Data.csproj" />
-    <ProjectReference Include="..\CakesWebApp.Views\CakesWebApp.Views.csproj" />
   </ItemGroup>
 
 </Project>

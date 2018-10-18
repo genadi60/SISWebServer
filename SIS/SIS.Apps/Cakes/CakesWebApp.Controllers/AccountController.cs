@@ -1,4 +1,6 @@
-﻿namespace CakesWebApp.Controllers
+﻿using SIS.MvcFramework.Services;
+
+namespace CakesWebApp.Controllers
 {
     using System;
     using System.Collections.Generic;
@@ -9,6 +11,7 @@
     using SIS.HTTP.Cookies;
     using SIS.HTTP.Requests.Contracts;
     using SIS.HTTP.Responses.Contracts;
+    using SIS.MvcFramework.Services.Contracts;
     using ViewModels;
     using ViewModels.Account;
 
