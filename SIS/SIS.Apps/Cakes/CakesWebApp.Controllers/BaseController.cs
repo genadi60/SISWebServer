@@ -19,6 +19,7 @@
         {
             Db = new CakesDbContext();
             ViewData = viewData;
+            ViewData["visible"] = "bloc";
         }
         
         protected Dictionary<string, string> ViewData { get; }
@@ -30,10 +31,6 @@
             if ("/".Equals(fileName))
             {
                 fileName = "home/index.html";
-            }
-            else if ("/favicon".Equals(fileName))
-            {
-                fileName = fileName + ".ico";
             }
             else
             {
@@ -65,7 +62,7 @@
             return result;
         }
         
-        protected string GetUserName(IHttpRequest request)
+        protected string GetUsername(IHttpRequest request)
         {
             if (!request.Cookies.ContainsCookie(".auth_cake"))
             {
@@ -93,7 +90,8 @@
         protected IHttpResponse BadRequestError(string errorMessage)
         {
             ViewData["errorMessage"] = errorMessage;
-            
+            ViewData["title"] = "Error";
+            ViewData["visible"] = "none";
             return FileViewResponse("error");
         }
 
@@ -115,12 +113,23 @@
 
         protected bool IsAuthenticated(IHttpRequest request)
         {
-            if(!request.Cookies.HasCookies() || !request.Cookies.ContainsCookie(".auth_cake"))
+            if(!request.Cookies.HasCookies() || !request.Cookies.ContainsCookie(".auth_cake") || !request.Session.ContainsParameter(".auth_cake"))
             {
-                ViewData["title"] = "Login";
+                ViewData["authenticated"] = "none";
+                ViewData["notAuthenticated"] = "bloc";
+                ViewData["visible"] = "bloc";
+
                 return false;
             }
-
+            ViewData["authenticated"] = "bloc";
+            ViewData["notAuthenticated"] = "none";
+            ViewData["visible"] = "bloc";
+            ViewData["greeting"] = GetUsername(request);
+            if (!ViewData.ContainsKey("searchTerm"))
+            {
+                ViewData["searchTerm"] = null;
+            }
+            
             return true;
         }
     }

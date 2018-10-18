@@ -85,53 +85,14 @@
 
         private IHttpResponse HandleRequest(IHttpRequest httpRequest)
         {
-            
-            var parsedPath = ParseRoute(httpRequest);
-
             if (!_serverRoutingTable.Routes.ContainsKey(httpRequest.RequestMethod)
-                || !_serverRoutingTable.Routes[httpRequest.RequestMethod].ContainsKey(parsedPath))
+                || !_serverRoutingTable.Routes[httpRequest.RequestMethod].ContainsKey(httpRequest.Path))
             {
                 return NotFound.PageNotFound();
             }
-            var response = _serverRoutingTable.Routes[httpRequest.RequestMethod][parsedPath].Invoke(httpRequest);
+            var response = _serverRoutingTable.Routes[httpRequest.RequestMethod][httpRequest.Path].Invoke(httpRequest);
 
             return response;
-        }
-
-        private string ParseRoute(IHttpRequest httpRequest)
-        {
-            var httpRequestPath = httpRequest.Path;
-            var parsedRegex = new StringBuilder();
-
-            ParsePath(httpRequest.RequestMethod, httpRequestPath, parsedRegex);
-
-            return parsedRegex.ToString().Trim();
-        }
-
-        private void ParsePath(HttpRequestMethod requestMethod, string httpRequestPath, StringBuilder parsedRegex)
-        {
-            var availableRoutes = _serverRoutingTable.Routes
-                    .Where(k => k.Key.Equals(requestMethod))
-                    .Select(k => k.Value)
-                    .Select(v => v.Keys)
-                    .ToList();
-
-            foreach (var routes in availableRoutes)
-            {
-                foreach (var route in routes)
-                {
-                    string pattern = $"^{route}$";
-                    var regex = new Regex(pattern);
-                    var match = regex.Match(httpRequestPath);
-
-                    if (!match.Success)
-                    {
-                        continue;
-                    }
-
-                    parsedRegex.Append(route);
-                }
-            }
         }
 
         private async Task PrepareResponse(IHttpResponse httpResponse)

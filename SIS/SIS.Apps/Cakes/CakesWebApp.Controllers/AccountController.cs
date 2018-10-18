@@ -17,28 +17,34 @@
         private readonly IHashService _hashService;
         private readonly IUserCookieService _userCookieService;
         private readonly IUserService _userService;
+        private readonly IHttpRequest _request;
 
-        public AccountController(Dictionary<string, string> viewData) : base(viewData)
+        public AccountController(IHttpRequest request, Dictionary<string, string> viewData) : base(viewData)
         {
             _hashService = new HashService();
             _userCookieService = new UserCookieService();
             _userService = new UserService();
+            _request = request;
+            if (!IsAuthenticated(_request))
+            {
+                Login();
+            }
         }
 
-        public IHttpResponse Register(IHttpRequest request)
+        public IHttpResponse Register()
         {
             SetDefaultViewData();
             ViewData["title"] = "Register";
             return FileViewResponse("account/register");
         }
 
-        public IHttpResponse DoRegister(IHttpRequest request)
+        public IHttpResponse DoRegister()
         {
             SetDefaultViewData();
-            var name = request.FormData["name"].ToString().Trim();
-            var userName = request.FormData["username"].ToString().Trim();
-            var password = request.FormData["password"].ToString();
-            var confirmPassword = request.FormData["confirmPassword"].ToString();
+            var name = _request.FormData["name"].ToString().Trim();
+            var userName = _request.FormData["username"].ToString().Trim();
+            var password = _request.FormData["password"].ToString();
+            var confirmPassword = _request.FormData["confirmPassword"].ToString();
             string errorMessage;
 
             var model = new RegisterViewModel
@@ -100,7 +106,7 @@
             return FileViewResponse("home/index");
         }
 
-        public IHttpResponse Login(IHttpRequest request)
+        public IHttpResponse Login()
         {
             SetDefaultViewData();
             ViewData["title"] = "Login";
@@ -108,22 +114,26 @@
             return FileViewResponse("account/login");
         }
 
-        public IHttpResponse DoLogin(IHttpRequest request)
+        public IHttpResponse DoLogin()
         {
-            var username = request.FormData["username"].ToString().Trim();
-            var password = request.FormData["password"].ToString();
+            var username = _request.FormData["username"].ToString().Trim();
+            var password = _request.FormData["password"].ToString();
 
             var hashedPassword = _hashService.Hash(password);
 
-            if (!Db.Users.Any(u => u.Username.Equals(username) && u.Password.Equals(hashedPassword)))
+            //var userName = Db.Users.FirstOrDefault(u => u.Username == username)?.Username;
+
+            bool isEqual = Db.Users.FirstOrDefault(u => u.Username.Equals(username)).Username.Equals(username);
+
+            if (!Db.Users.Any(u => u.Password.Equals(hashedPassword)) || !isEqual)
             {
                 var errorMessage = "Invalid username or password.";
                 return BadRequestError(errorMessage);
             }
 
-            request.Session.AddParameter(".auth_cake", username);
+            _request.Session.AddParameter(".auth_cake", username);
 
-            request.Session.AddParameter(ShoppingCartViewModel.SessionKey, new ShoppingCartViewModel());
+            _request.Session.AddParameter(ShoppingCartViewModel.SessionKey, new ShoppingCartViewModel());
 
             ViewData["authenticated"] = "bloc";
             ViewData["notAuthenticated"] = "none";
@@ -141,15 +151,15 @@
 
         }
 
-        public IHttpResponse Logout(IHttpRequest request)
+        public IHttpResponse Logout()
         {
-            if (!request.Cookies.ContainsCookie(".auth_cake"))
+            if (!_request.Cookies.ContainsCookie(".auth_cake"))
             {
                 ViewData["title"] = "Home";
                 return FileViewResponse("home/index");
             }
 
-            var cookie = request.Cookies.GetCookie(".auth_cake");
+            var cookie = _request.Cookies.GetCookie(".auth_cake");
             cookie.Delete();
 
             SetDefaultViewData();
@@ -163,16 +173,16 @@
             return response;
         }
 
-        public IHttpResponse GetProfile(IHttpRequest request)
+        public IHttpResponse GetProfile()
         {
-            if (!IsAuthenticated(request))
+            if (!IsAuthenticated(_request))
             {
                 return FileViewResponse("account/login");
             }
 
             using (Db)
             {
-                var username = GetUserName(request);
+                var username = GetUsername(_request);
 
                 if (username == null)
                 {

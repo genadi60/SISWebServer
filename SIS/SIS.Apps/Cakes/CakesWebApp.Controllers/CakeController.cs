@@ -1,11 +1,9 @@
-﻿using System.Net;
-using CakesWebApp.ViewModels.Product;
-
-namespace CakesWebApp.Controllers
+﻿namespace CakesWebApp.Controllers
 {
-    using System.Globalization;
     using System.Collections.Generic;
+    using System.Globalization;
     using System.Linq;
+    using System.Net;
     using System.Text;
     
     using Services;
@@ -13,20 +11,24 @@ namespace CakesWebApp.Controllers
     using SIS.HTTP.Requests.Contracts;
     using SIS.HTTP.Responses.Contracts;
     using ViewModels;
+    using ViewModels.Product;
 
     public class CakeController : BaseController
     {
-        public CakeController(Dictionary<string,string> viewData) : base(viewData)
+        private readonly IHttpRequest _request;
+        public CakeController(IHttpRequest request, Dictionary<string,string> viewData) : base(viewData)
         {
-            
+            _request = request;
+           
         }
 
         private readonly IProductService _productService = new ProductService();
 
-        public IHttpResponse AddCake(IHttpRequest request)
+        public IHttpResponse AddCake()
         {
-            if (!request.Cookies.HasCookies() || !request.Cookies.ContainsCookie(".auth_cake"))
+            if (!IsAuthenticated(_request))
             {
+                ViewData["visible"] = "bloc";
                 ViewData["title"] = "Login";
                 return FileViewResponse("account/login");
             }
@@ -37,13 +39,13 @@ namespace CakesWebApp.Controllers
             return FileViewResponse("products/add");
         }
 
-        public IHttpResponse DoAddCake(IHttpRequest request)
+        public IHttpResponse DoAddCake()
         {
-            var name = request.FormData["name"].ToString().Trim();
-            var price = decimal.Parse(request.FormData["price"].ToString());
-            var urlString = WebUtility.HtmlDecode(request.FormData["imageUrl"].ToString());
+            var name = _request.FormData["name"].ToString().Trim();
+            var price = decimal.Parse(_request.FormData["price"].ToString());
+            var urlString = WebUtility.HtmlDecode(_request.FormData["imageUrl"].ToString());
             
-            if (string.IsNullOrWhiteSpace(name))
+            if (string.IsNullOrWhiteSpace(name) || !IsAuthenticated(_request))
             {
                 var errorMessage = "Please, provide valid product name.";
                 return BadRequestError(errorMessage);
@@ -65,9 +67,9 @@ namespace CakesWebApp.Controllers
             return FileViewResponse("products/add");
         }
 
-        public IHttpResponse Search(IHttpRequest request)
+        public IHttpResponse Search()
         {
-            if (!request.Cookies.HasCookies() || !request.Cookies.ContainsCookie(".auth_cake"))
+            if (!IsAuthenticated(_request))
             {
                 ViewData["title"] = "Login";
                 return FileViewResponse("account/login");
@@ -75,8 +77,8 @@ namespace CakesWebApp.Controllers
 
             const string searchTermKey = "searchTerm";
 
-            var parameters = request.QueryData;
-            var shoppingCart = request.Session.GetParameter<ShoppingCartViewModel>(ShoppingCartViewModel.SessionKey);
+            var parameters = _request.QueryData;
+            var shoppingCart = _request.Session.GetParameter<ShoppingCartViewModel>(ShoppingCartViewModel.SessionKey);
 
             ViewData["title"] = "Search Cake";
 
@@ -111,11 +113,11 @@ namespace CakesWebApp.Controllers
                 {
                     sb.AppendLine($@"<div class=""form-group row""> 
                         <div class=""col-sm-3""></div>
-                        <a class=""btn btn-outline-primary col-sm-4"" href=""/details/{model.Id}"">{model.Name}</a>
+                        <a class=""btn btn-outline-primary col-sm-4"" href=""/details?id={model.Id}"">{model.Name}</a>
                         <div class=""col-sm-1"">
                         <p>${model.Price}</p>
                         </div>
-                        <form method=""post"" action=""shopping/add"" class=""col-sm-1"">
+                        <form method=""get"" action=""shopping/add"" class=""col-sm-1"">
                             <button type=""submit"" name=""id"" class=""btn btn-outline-primary"" value=""{model.Id}"">Order</button>
                         </form>
                         <div class=""col-sm-3""></div>
@@ -144,12 +146,11 @@ namespace CakesWebApp.Controllers
             return FileViewResponse("products/search");
         }
 
-        public IHttpResponse CakeDetails(IHttpRequest request)
+        public IHttpResponse CakeDetails()
         {
-            var cakeId = request.Url
-                .Split('/')
-                .Last()
-                .Trim();
+            var cakeId = _request.QueryData["id"].ToString().Trim();
+            var id = int.Parse(cakeId);
+                
 
             if (string.IsNullOrWhiteSpace(cakeId))
 
@@ -159,7 +160,7 @@ namespace CakesWebApp.Controllers
             }
 
             var cake = Db.Products
-                .FirstOrDefault(c => c.Id == int.Parse(cakeId));
+                .FirstOrDefault(c => c.Id == id);
 
             if (cake == null)
             {
@@ -172,14 +173,15 @@ namespace CakesWebApp.Controllers
             var pictureUrl = cake.ImageUrl;
 
             ViewData["cakeName"] = name;
+            ViewData["cakeId"] = cakeId;
             ViewData["cakePrice"] = price.ToString(CultureInfo.InvariantCulture);
             ViewData["pictureUrl"] = pictureUrl;
             ViewData["title"] = "Cake Details";
-
+            
             return FileViewResponse("products/cakeDetails");
         }
 
-        public IHttpResponse GetCakes(IHttpRequest request)
+        public IHttpResponse GetCakes()
         {
             var cakes = _productService.ShowAll();
 

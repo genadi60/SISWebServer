@@ -75,17 +75,6 @@
 
         public ICollection<ProductInCartViewModel> FindProductsInCart(IEnumerable<int> ids)
         {
-            //using (var db = new CakesDbContext())
-            //{
-            //    return db.Products
-            //        .Where(pr => ids.Contains(pr.Id))
-            //        .Select(pr => new ProductInCartViewModel
-            //        {
-            //            Name = pr.Name,
-            //            Price = pr.Price
-            //        })
-            //        .ToList();
-            //}
             using (var db = new CakesDbContext())
             {
                 var products = db.Products.ToList();

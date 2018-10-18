@@ -1,40 +1,69 @@
-﻿namespace CakesWebApp.Controllers
+﻿using System;
+using System.IO;
+using System.Linq;
+using System.Net.Sockets;
+using System.Text;
+using System.Drawing;
+
+using SIS.HTTP.Enums;
+using SIS.HTTP.Requests;
+using SIS.HTTP.Responses;
+using SIS.WebServer.Results;
+
+namespace CakesWebApp.Controllers
 {
     using System.Collections.Generic;
 
     using SIS.HTTP.Requests.Contracts;
     using SIS.HTTP.Responses.Contracts;
     using ViewModels;
+    using static System.Net.Mime.MediaTypeNames;
 
     public class HomeController : BaseController
     {
-        public HomeController(Dictionary<string,string> viewData) : base(viewData)
+        private readonly IHttpRequest _request;
+
+        public HomeController(IHttpRequest request, Dictionary<string,string> viewData) : base(viewData)
         {
-            
+            _request = request;
+            if (IsAuthenticated(_request))
+            {
+                ViewData["visible"] = "bloc";
+            }
         }
-        public IHttpResponse Index(IHttpRequest request)
+        public IHttpResponse Index()
         {
-            if (request.Cookies.HasCookies() && request.Cookies.ContainsCookie(".auth_cake"))
+            IHttpResponse response = null;
+            if (IsAuthenticated(_request))
             {
                 ViewData["authenticated"] = "bloc";
                 ViewData["notAuthenticated"] = "none";
-                ViewData["greeting"] = GetUserName(request);
+                ViewData["greeting"] = GetUsername(_request);
                 ViewData["searchTerm"] = null;
-                request.Session.AddParameter(ShoppingCartViewModel.SessionKey, new ShoppingCartViewModel());
+                _request.Session.AddParameter(ShoppingCartViewModel.SessionKey, new ShoppingCartViewModel());
+                return FileViewResponse("home/index");
             }
             else
             {
                 ViewData["authenticated"] = "none";
                 ViewData["notAuthenticated"] = "bloc";
+                if (_request.Cookies.ContainsCookie(".auth_cake"))
+                {
+                    var cookie = _request.Cookies.GetCookie(".auth_cake");
+                    cookie.Delete();
+                    response = FileViewResponse("home/index");
+                    response.Cookies.Add(cookie);
+                }
             }
 
+            
             ViewData["title"] = "The Cake";
-            return FileViewResponse("home/index");
+            return response;
         }
 
-        public IHttpResponse Hello(IHttpRequest request)
+        public IHttpResponse Hello()
         {
-            var userName = GetUserName(request);
+            var userName = GetUsername(_request);
             if (userName == null)
             {
                 ViewData["show"] = "none";
@@ -48,9 +77,6 @@
             return FileViewResponse("account/hello");
         }
 
-        public IHttpResponse About(IHttpRequest request) => FileViewResponse("home/about");
-
-        public IHttpResponse Favicon(IHttpRequest request) => FileViewResponse("favicon");
-
+        public IHttpResponse About() => FileViewResponse("home/about");
     }
 }

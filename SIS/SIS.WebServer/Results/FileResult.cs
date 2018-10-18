@@ -10,7 +10,7 @@ namespace SIS.WebServer.Results
     {
         public FileResult(byte[] content, HttpResponseStatusCode statusCode) :base(statusCode)
         {
-            Headers.Add(new HttpHeader(GlobalConstants.ContentType, "text/plain"));
+            Headers.Add(new HttpHeader(GlobalConstants.ContentType, "image/png"));
             Content = content;
         }
     }
