@@ -1,15 +1,12 @@
 ﻿namespace SIS.WebServer
 {
     using System;
-    using System.Linq;
     using System.Net.Sockets;
     using System.Text;
-    using System.Text.RegularExpressions;
     using System.Threading.Tasks;
 
     using HTTP.Common;
     using HTTP.Cookies;
-    using HTTP.Enums;
     using HTTP.Requests;
     using HTTP.Requests.Contracts;
     using HTTP.Responses.Contracts;

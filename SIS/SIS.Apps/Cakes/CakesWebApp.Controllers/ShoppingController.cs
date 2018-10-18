@@ -18,30 +18,27 @@
         private readonly IUserService _user;
         private readonly IProductService _product;
         private readonly IShoppingService _shopping;
-        private readonly IHttpRequest _request;
-
-        public ShoppingController(IHttpRequest request, Dictionary<string, string> viewData) : base(viewData)
+        
+        public ShoppingController()
         {
             _user = new UserService();
             _product = new ProductService();
             _shopping = new ShoppingService();
-            _request = request;
-            
         }
 
         public IHttpResponse AddToCart()
         {
-            if (!IsAuthenticated(_request))
+            if (!IsAuthenticated())
             {
                 ViewData["visible"] = "bloc";
                 ViewData["title"] = "Login";
                 return FileViewResponse("account/login");
             }
 
-            var cakeId = _request.QueryData["id"].ToString().Trim();
+            var cakeId = Request.QueryData["id"].ToString().Trim();
             var id = int.Parse(cakeId);
 
-            var userName = GetUsername(_request);
+            var userName = GetUsername();
 
             if (userName == null)
             {
@@ -56,7 +53,7 @@
                 return NotFound.PageNotFound();
             }
 
-            var shoppingCart = _request.Session.GetParameter<ShoppingCartViewModel>(ShoppingCartViewModel.SessionKey);
+            var shoppingCart = Request.Session.GetParameter<ShoppingCartViewModel>(ShoppingCartViewModel.SessionKey);
             var cartproductsIds = shoppingCart.ProductIds;
 
             cartproductsIds.Add(id);
@@ -67,20 +64,20 @@
 
         public IHttpResponse ShowCart()
         {
-            if (!IsAuthenticated(_request))
+            if (!IsAuthenticated())
             {
                 ViewData["visible"] = "bloc";
                 ViewData["title"] = "Login";
                 return FileViewResponse("account/login");
             }
 
-            if (!_request.Cookies.HasCookies() || !_request.Cookies.ContainsCookie(".auth_cake"))
+            if (!Request.Cookies.HasCookies() || !Request.Cookies.ContainsCookie(".auth_cake"))
             {
                 ViewData["title"] = "Login";
                 return FileViewResponse("account/login");
             }
 
-            var shoppingCart = _request.Session.GetParameter<ShoppingCartViewModel>(ShoppingCartViewModel.SessionKey);
+            var shoppingCart = Request.Session.GetParameter<ShoppingCartViewModel>(ShoppingCartViewModel.SessionKey);
 
             if (!shoppingCart.ProductIds.Any())
             {
@@ -114,14 +111,14 @@
 
         public IHttpResponse FinishOrder()
         {
-            if (!IsAuthenticated(_request))
+            if (!IsAuthenticated())
             {
                 ViewData["visible"] = "bloc";
                 ViewData["title"] = "Login";
                 return FileViewResponse("account/login");
             }
 
-            var username = GetUsername(_request);
+            var username = GetUsername();
 
             if (username == null)
             {
@@ -129,7 +126,7 @@
                 return FileViewResponse("account/login");
             }
 
-            var shoppingCart = _request.Session.GetParameter<ShoppingCartViewModel>(ShoppingCartViewModel.SessionKey);
+            var shoppingCart = Request.Session.GetParameter<ShoppingCartViewModel>(ShoppingCartViewModel.SessionKey);
 
             var userId = _user.GetUserId(username);
 
@@ -150,7 +147,7 @@
 
         public IHttpResponse MyOrders()
         {
-            if (!IsAuthenticated(_request))
+            if (!IsAuthenticated())
             {
                 ViewData["visible"] = "bloc";
                 ViewData["title"] = "Login";
@@ -159,7 +156,7 @@
 
             using (Db)
             {
-                var username = GetUsername(_request);
+                var username = GetUsername();
 
                 var orders = Db.Orders
                     .Where(o => o.User.Username.Equals(username))
@@ -184,16 +181,16 @@
 
         public IHttpResponse Details()
         {
-            if (!IsAuthenticated(_request))
+            if (!IsAuthenticated())
             {
                 ViewData["visible"] = "bloc";
                 ViewData["title"] = "Login";
                 return FileViewResponse("account/login");
             }
 
-            var orderParameter = _request.QueryData["id"].ToString().Trim();
+            var orderParameter = Request.QueryData["id"].ToString().Trim();
             var orderId = int.Parse(orderParameter);
-            var username = GetUsername(_request);
+            var username = GetUsername();
 
             using (Db)
             {

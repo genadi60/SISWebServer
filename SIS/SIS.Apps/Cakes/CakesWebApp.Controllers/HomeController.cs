@@ -1,22 +1,13 @@
 ﻿namespace CakesWebApp.Controllers
 {
-    using System.Collections.Generic;
-
-    using SIS.HTTP.Requests.Contracts;
     using SIS.HTTP.Responses.Contracts;
     using ViewModels;
 
     public class HomeController : BaseController
     {
-        private readonly IHttpRequest _request;
-
-        public HomeController(IHttpRequest request, Dictionary<string,string> viewData) : base(viewData)
+       public HomeController()
         {
-            _request = request;
-            if (IsAuthenticated(_request))
-            {
-                ViewData["visible"] = "bloc";
-            }
+           
         }
         public IHttpResponse Index()
         {
@@ -24,13 +15,13 @@
 
             ViewData["title"] = "The Cake";
 
-            if (IsAuthenticated(_request))
+            if (IsAuthenticated())
             {
                 ViewData["authenticated"] = "bloc";
                 ViewData["notAuthenticated"] = "none";
-                ViewData["greeting"] = GetUsername(_request);
+                ViewData["greeting"] = GetUsername();
                 ViewData["searchTerm"] = null;
-                _request.Session.AddParameter(ShoppingCartViewModel.SessionKey, new ShoppingCartViewModel());
+                Request.Session.AddParameter(ShoppingCartViewModel.SessionKey, new ShoppingCartViewModel());
 
                 response = FileViewResponse("/");
             }
@@ -40,9 +31,9 @@
                 ViewData["notAuthenticated"] = "bloc";
                 response = FileViewResponse("/");
 
-                if (_request.Cookies.ContainsCookie(".auth_cake"))
+                if (Request.Cookies.ContainsCookie(".auth_cake"))
                 {
-                    var cookie = _request.Cookies.GetCookie(".auth_cake");
+                    var cookie = Request.Cookies.GetCookie(".auth_cake");
                     cookie.Delete();
                 
                     response.Cookies.Add(cookie);
@@ -54,12 +45,14 @@
 
         public IHttpResponse Hello()
         {
-            if (!IsAuthenticated(_request))
+            if (!IsAuthenticated())
             {
+                ViewData["visible"] = "bloc";
+                ViewData["title"] = "Login";
                 return FileViewResponse("account/login");
             }
 
-            var userName = GetUsername(_request);
+            var userName = GetUsername();
             if (userName == null)
             {
                 ViewData["show"] = "none";
@@ -73,6 +66,11 @@
             return FileViewResponse("account/hello");
         }
 
-        public IHttpResponse About() => FileViewResponse("home/about");
+        public IHttpResponse About()
+        {
+            IsAuthenticated();
+            ViewData["title"] = "About Us";
+            return FileViewResponse("home/about");
+        } 
     }
 }

@@ -15,18 +15,14 @@
 
     public class CakeController : BaseController
     {
-        private readonly IHttpRequest _request;
-        public CakeController(IHttpRequest request, Dictionary<string,string> viewData) : base(viewData)
-        {
-            _request = request;
-           
-        }
-
         private readonly IProductService _productService = new ProductService();
-
+        public CakeController()
+        {
+        }
+        
         public IHttpResponse AddCake()
         {
-            if (!IsAuthenticated(_request))
+            if (!IsAuthenticated())
             {
                 ViewData["visible"] = "bloc";
                 ViewData["title"] = "Login";
@@ -41,11 +37,18 @@
 
         public IHttpResponse DoAddCake()
         {
-            var name = _request.FormData["name"].ToString().Trim();
-            var price = decimal.Parse(_request.FormData["price"].ToString());
-            var urlString = WebUtility.HtmlDecode(_request.FormData["imageUrl"].ToString());
+            if (!IsAuthenticated())
+            {
+                ViewData["visible"] = "bloc";
+                ViewData["title"] = "Login";
+                return FileViewResponse("account/login");
+            }
+
+            var name = Request.FormData["name"].ToString().Trim();
+            var price = decimal.Parse(Request.FormData["price"].ToString());
+            var urlString = WebUtility.HtmlDecode(Request.FormData["imageUrl"].ToString());
             
-            if (string.IsNullOrWhiteSpace(name) || !IsAuthenticated(_request))
+            if (string.IsNullOrWhiteSpace(name) || !IsAuthenticated())
             {
                 var errorMessage = "Please, provide valid product name.";
                 return BadRequestError(errorMessage);
@@ -69,16 +72,17 @@
 
         public IHttpResponse Search()
         {
-            if (!IsAuthenticated(_request))
+            if (!IsAuthenticated())
             {
+                ViewData["visible"] = "bloc";
                 ViewData["title"] = "Login";
                 return FileViewResponse("account/login");
             }
 
             const string searchTermKey = "searchTerm";
 
-            var parameters = _request.QueryData;
-            var shoppingCart = _request.Session.GetParameter<ShoppingCartViewModel>(ShoppingCartViewModel.SessionKey);
+            var parameters = Request.QueryData;
+            var shoppingCart = Request.Session.GetParameter<ShoppingCartViewModel>(ShoppingCartViewModel.SessionKey);
 
             ViewData["title"] = "Search Cake";
 
@@ -148,7 +152,14 @@
 
         public IHttpResponse CakeDetails()
         {
-            var cakeId = _request.QueryData["id"].ToString().Trim();
+            if (!IsAuthenticated())
+            {
+                ViewData["visible"] = "bloc";
+                ViewData["title"] = "Login";
+                return FileViewResponse("account/login");
+            }
+
+            var cakeId = Request.QueryData["id"].ToString().Trim();
             var id = int.Parse(cakeId);
                 
 
@@ -183,6 +194,8 @@
 
         public IHttpResponse GetCakes()
         {
+            IsAuthenticated();
+
             var cakes = _productService.ShowAll();
 
             if (cakes == null || cakes.Count == 0)
