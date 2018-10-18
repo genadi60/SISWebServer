@@ -116,8 +116,24 @@
 
         public IHttpResponse DoLogin()
         {
-            var username = _request.FormData["username"].ToString().Trim();
-            var password = _request.FormData["password"].ToString();
+            string username = null;
+            string password = null;
+            if (_request.FormData.ContainsKey("username"))
+            {
+                username = _request.FormData["username"].ToString().Trim();
+            }
+
+            if (_request.FormData.ContainsKey("password"))
+            {
+                password = _request.FormData["password"].ToString();
+            }
+            
+            if (string.IsNullOrWhiteSpace(username) || string.IsNullOrWhiteSpace(password)
+                                                    || string.IsNullOrEmpty(username) || string.IsNullOrEmpty(password))
+            {
+                var errorMessage = "Invalid username or password.";
+                return BadRequestError(errorMessage);
+            }
 
             var hashedPassword = _hashService.Hash(password);
 

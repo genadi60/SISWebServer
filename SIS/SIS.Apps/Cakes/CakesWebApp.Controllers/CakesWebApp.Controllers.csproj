@@ -8,7 +8,6 @@
     <ProjectReference Include="..\..\..\SIS.HTTP\SIS.HTTP.csproj" />
     <ProjectReference Include="..\..\..\SIS.WebServer\SIS.WebServer.csproj" />
     <ProjectReference Include="..\CacesWebApp.Resorces\CakesWebApp.Resources.csproj" />
-    <ProjectReference Include="..\CakesWebApp.Data\CakesWebApp.Data.csproj" />
     <ProjectReference Include="..\CakesWebApp.Services\CakesWebApp.Services.csproj" />
     <ProjectReference Include="..\CakesWebApp.ViewModels\CakesWebApp.ViewModels.csproj" />
     <ProjectReference Include="..\CakesWebApp.Views\CakesWebApp.Views.csproj" />

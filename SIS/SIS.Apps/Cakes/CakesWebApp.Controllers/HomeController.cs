@@ -1,23 +1,10 @@
-﻿using System;
-using System.IO;
-using System.Linq;
-using System.Net.Sockets;
-using System.Text;
-using System.Drawing;
-
-using SIS.HTTP.Enums;
-using SIS.HTTP.Requests;
-using SIS.HTTP.Responses;
-using SIS.WebServer.Results;
-
-namespace CakesWebApp.Controllers
+﻿namespace CakesWebApp.Controllers
 {
     using System.Collections.Generic;
 
     using SIS.HTTP.Requests.Contracts;
     using SIS.HTTP.Responses.Contracts;
     using ViewModels;
-    using static System.Net.Mime.MediaTypeNames;
 
     public class HomeController : BaseController
     {
@@ -34,6 +21,9 @@ namespace CakesWebApp.Controllers
         public IHttpResponse Index()
         {
             IHttpResponse response = null;
+
+            ViewData["title"] = "The Cake";
+
             if (IsAuthenticated(_request))
             {
                 ViewData["authenticated"] = "bloc";
@@ -41,28 +31,34 @@ namespace CakesWebApp.Controllers
                 ViewData["greeting"] = GetUsername(_request);
                 ViewData["searchTerm"] = null;
                 _request.Session.AddParameter(ShoppingCartViewModel.SessionKey, new ShoppingCartViewModel());
-                return FileViewResponse("home/index");
+
+                response = FileViewResponse("/");
             }
             else
             {
                 ViewData["authenticated"] = "none";
                 ViewData["notAuthenticated"] = "bloc";
+                response = FileViewResponse("/");
+
                 if (_request.Cookies.ContainsCookie(".auth_cake"))
                 {
                     var cookie = _request.Cookies.GetCookie(".auth_cake");
                     cookie.Delete();
-                    response = FileViewResponse("home/index");
+                
                     response.Cookies.Add(cookie);
                 }
             }
 
-            
-            ViewData["title"] = "The Cake";
             return response;
         }
 
         public IHttpResponse Hello()
         {
+            if (!IsAuthenticated(_request))
+            {
+                return FileViewResponse("account/login");
+            }
+
             var userName = GetUsername(_request);
             if (userName == null)
             {

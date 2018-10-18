@@ -8,77 +8,72 @@
     <meta name="author" content="Genadi">
     <title>{{{title}}}</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
-    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
-    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
-    <link rel="icon" type="favicon" href="/favicon.ico">
-    <link rel="manifest" href="/site.webmanifest">
-    <link rel="mask-icon" href="/safari-pinned-tab.svg" color="#5bbad5">
-    <meta name="msapplication-TileColor" content="#da532c">
-    <meta name="theme-color" content="#ffffff">
-    <!--<link rel="shortcut icon" href="/cake.svg" sizes="any" type="image/svg+xml" />-->
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css" integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO" crossorigin="anonymous">
     <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.4.1/css/all.css" integrity="sha384-5sAR7xN1Nv6T6+dT2mhtzEpVJvfS3NScPQTrOxhwjIuvcA67KV2R5Jz6kr4abQsz" crossorigin="anonymous">
 </head>
 <body style="background-color: rgba(255, 215, 0, 0.22)">
-    <nav class="navbar sticky-top navbar-expand-lg" style="background-color: #fac520">
-        <div class="container-fluid">
-            <a class="navbar-brand" href="/"><i class="fas fa-birthday-cake"></i> The Cake</a>
-            <div class="collapse navbar-collapse">
-                <ul class="navbar-nav">
-                    <li class="nav-item ">
+<nav class="navbar sticky-top navbar-expand-lg" style="background-color: #fac520">
+    <div class="container-fluid">
+        <a class="navbar-brand" href="/"><i class="fas fa-birthday-cake"></i> The Cake</a>
+        <div class="collapse navbar-collapse">
+            <ul class="navbar-nav">
+                <li class="nav-item ">
                         
-                        <a class="nav-link " href="/"><i class="fas fa-home"></i> Home</a>
+                    <a class="nav-link " href="/"><i class="fas fa-home"></i> Home</a>
+                </li>
+            </ul>
+        </div>
+        <form class="form-inline" method="get" action="/search" style="display: {{{visible}}}">
+            <div class="form-inline" style="display: {{{notAuthenticated}}}">
+                <ul class="navbar-nav form-inline">
+                    <li class="nav-item">
+                            
+                        <a class="nav-link" href="/login"><i class="fas fa-sign-in-alt"></i> Login</a>
+
+                    </li>
+                    <li class="nav-item">
+                            
+                        <a class="nav-link" href="register"><i class="fas fa-user-plus"></i> Register</a>
+
                     </li>
                 </ul>
             </div>
-            <form class="form-inline" method="get" action="/search" style="display: {{{visible}}}">
-                <div class="form-inline" style="display: {{{notAuthenticated}}}">
-                    <ul class="navbar-nav form-inline">
-                        <li class="nav-item">
-                            
-                            <a class="nav-link" href="/login"><i class="fas fa-sign-in-alt"></i> Login</a>
+            <div class="form-inline" style="display: {{{authenticated}}}">
+                <ul class="navbar-nav form-inline">
+                    <li class="nav-item">
 
-                        </li>
-                        <li class="nav-item">
-                            
-                            <a class="nav-link" href="register"><i class="fas fa-user-plus"></i> Register</a>
+                        <a class="nav-link" href="/hello"><i class="far fa-hand-paper"></i> Hello {{{greeting}}}</a>
 
-                        </li>
-                    </ul>
-                </div>
-                <div class="form-inline" style="display: {{{authenticated}}}">
-                    <ul class="navbar-nav form-inline">
-                        <li class="nav-item">
+                    </li>
+                    <li class="nav-item">
 
-                            <a class="nav-link" href="/hello"><i class="far fa-hand-paper"></i> Hello {{{greeting}}}</a>
+                        <a class="nav-link" href="/add"><i class="fas fa-plus"></i> Add Cake</a>
 
-                        </li>
-                        <li class="nav-item">
+                    </li>
+                    <li class="nav-item">
 
-                            <a class="nav-link" href="/add"><i class="fas fa-plus"></i> Add Cake</a>
+                        <a class="nav-link" href="/profile"><i class="far fa-user-circle"></i> My Profile</a>
 
-                        </li>
-                        <li class="nav-item">
+                    </li>
+                    <li class="nav-item">
 
-                            <a class="nav-link" href="/profile"><i class="far fa-user-circle"></i> My Profile</a>
+                        <a class="nav-link" href="/logout"><i class="fas fa-sign-out-alt"></i> Logout</a>
 
-                        </li>
-                        <li class="nav-item">
-
-                            <a class="nav-link" href="/logout"><i class="fas fa-sign-out-alt"></i> Logout</a>
-
-                        </li>
-                    </ul>
-                    <input class="form-control mr-sm-2" name="searchTerm" type="search" value="{{{searchTerm}}}" placeholder="Search" aria-label="Search">
-                    <button class="btn btn-outline-primary my-2 my-sm-0" type="submit"><i class="fas fa-search"></i></button>
-                </div>
-            </form>
-        </div>
-    </nav>
-    <div class="text-center">
+                    </li>
+                </ul>
+                <input class="form-control mr-sm-2" name="searchTerm" type="search" value="{{{searchTerm}}}" placeholder="Search" aria-label="Search">
+                <button class="btn btn-outline-primary my-2 my-sm-0" type="submit"><i class="fas fa-search"></i></button>
+            </div>
+        </form>
+    </div>
+</nav>
+<div class="row">
+    <div class="col-sm-2"></div>
+    <div class="jumbotron jumbotron-fluid col-sm-8 text-center">
         {{{content}}}
     </div>
+    <div class="col-sm-2"></div>
+</div>
     <footer style="background-color: #fac520; text-align: center">
         &copy;All Rights Reserved.
         <pre>
@@ -88,7 +83,6 @@
     </pre>
     </footer>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js" integrity="sha384-ChfqqxuZUCnJSK3+MXmPNIyE6ZbWh2IMqE241rYiqJxyMiZ6OW/JmZQ5stwEULTy" crossorigin="anonymous"></script>
-    <!--<script src="https://ajax.googleapis.com/ajax/libs/jquery/4.1.3/jquery.min.js"></script>-->
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js"></script>
 </body>
