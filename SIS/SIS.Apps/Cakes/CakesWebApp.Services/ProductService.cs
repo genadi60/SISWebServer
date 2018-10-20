@@ -107,6 +107,7 @@
                 return db.Products
                     .Select(pr => new ProductShowViewModel
                     {
+                        Id = pr.Id,
                         Name = pr.Name,
                         ImageUrl = pr.ImageUrl
                     })

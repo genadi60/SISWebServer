@@ -33,7 +33,6 @@ namespace SIS.MvcFramework
                
             }
             ViewData = (Dictionary<string, string>)_session.GetParameter("viewData");
-           
         }
 
         protected IUserCookieService UserCookieService { get; set; }
@@ -61,13 +60,6 @@ namespace SIS.MvcFramework
                 return userName;
             }
         }
-
-        //protected IHttpResponse FileViewResponse(string fileName)
-        //{
-        //    var result = ProcessFileHtml(fileName);
-
-        //    return new HtmlResult(result, HttpResponseStatusCode.OK);
-        //}
 
         private string ProcessFileHtml(string fileName)
         {
@@ -103,6 +95,7 @@ namespace SIS.MvcFramework
             Response.AddHeader(new HttpHeader(GlobalConstants.ContentDisposition, "inline"));
             Response.StatusCode = HttpResponseStatusCode.OK;
             Response.Content = content;
+
             return Response;
         }
 
@@ -110,6 +103,7 @@ namespace SIS.MvcFramework
         {
             Response.AddHeader(new HttpHeader(GlobalConstants.Location, location));
             Response.StatusCode = HttpResponseStatusCode.See_Other;
+
             return Response;
         }
 
@@ -117,14 +111,14 @@ namespace SIS.MvcFramework
         {
             Response.AddHeader(new HttpHeader(GlobalConstants.ContentType, "text/plain; charset=utf-8"));
             Response.StatusCode = HttpResponseStatusCode.OK;
-            Response.Content = Encoding.UTF8.GetBytes(content);
+            PrepareHtmlResult(content);
+
             return Response;
         }
 
         private void PrepareHtmlResult(string content)
         {
             Response.Headers.Add(new HttpHeader(GlobalConstants.ContentType, "text/html; charset=utf-8"));
-            Response.StatusCode = HttpResponseStatusCode.OK;
             Response.Content = Encoding.UTF8.GetBytes(content);
         }
 
@@ -139,32 +133,29 @@ namespace SIS.MvcFramework
 
         protected IHttpResponse BadRequestError(string errorMessage)
         {
-            ViewData["errorMessage"] = errorMessage;
-            ViewData["title"] = "Error";
-            ViewData["visible"] = "none";
-            return View("error");
+            var content = PrepareErrorData(HttpResponseStatusCode.Bad_Request, errorMessage);
+            
+            PrepareHtmlResult(content);
+            
+            return Response;
         }
 
         protected IHttpResponse ServerError(string errorMessage)
         {
-            ViewData["errorMessage"] = errorMessage;
-            ViewData["title"] = "Error";
-            ViewData["visible"] = "none";
-
-            var content = ProcessFileHtml("error");
+            var content = PrepareErrorData(HttpResponseStatusCode.Internal_Server_Error, errorMessage);
+            
             PrepareHtmlResult(content);
-            Response.StatusCode = HttpResponseStatusCode.Internal_Server_Error;
-
+            
             return Response;
         }
 
         public IHttpResponse NotFound()
         {
-            ViewData["errorMessage"] = GlobalConstants.NotFoundPage;
-            ViewData["title"] = "Error";
-            ViewData["visible"] = "none";
-            Response.StatusCode = HttpResponseStatusCode.Not_Found;
-            return View("error");
+            var content = PrepareErrorData(HttpResponseStatusCode.Not_Found, GlobalConstants.NotFoundPage);
+            
+            PrepareHtmlResult(content);
+
+            return Response;
         }
 
         protected bool IsAuthenticated()
@@ -192,6 +183,17 @@ namespace SIS.MvcFramework
         protected void SetDefaultViewData()
         {
             ViewData["authenticated"] = "none";
+        }
+
+        private string PrepareErrorData(HttpResponseStatusCode statusCode, string errorMessage)
+        {
+            ViewData["errorMessage"] = errorMessage;
+            ViewData["title"] = "Error";
+            ViewData["visible"] = "none";
+
+            var content = ProcessFileHtml("error");
+            Response.StatusCode = statusCode;
+            return content;
         }
     }
 }
