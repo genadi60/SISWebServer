@@ -1,14 +1,11 @@
 ﻿namespace CakesWebApp.Controllers
 {
-    using System.Collections.Generic;
     using System.Linq;
     using System.Text;
 
     using Services;
     using Services.Contracts;
-    using SIS.HTTP.Requests.Contracts;
     using SIS.HTTP.Responses.Contracts;
-    using SIS.WebServer.Results;
     using ViewModels;
     using ViewModels.Product;
 
@@ -32,33 +29,33 @@
             {
                 ViewData["visible"] = "bloc";
                 ViewData["title"] = "Login";
-                return FileViewResponse("account/login");
+                return View("account/login");
             }
 
             var cakeId = Request.QueryData["id"].ToString().Trim();
             var id = int.Parse(cakeId);
 
-            var userName = GetUsername();
+            var userName = User;
 
             if (userName == null)
             {
                 ViewData["title"] = "Login";
-                return FileViewResponse("account/login");
+                return View("account/login");
             }
 
             var productExists = _product.Exists(id);
 
             if (!productExists)
             {
-                return NotFound.PageNotFound();
+                return NotFound();
             }
 
             var shoppingCart = Request.Session.GetParameter<ShoppingCartViewModel>(ShoppingCartViewModel.SessionKey);
-            var cartproductsIds = shoppingCart.ProductIds;
+            var cartProductIds = shoppingCart.ProductIds;
 
-            cartproductsIds.Add(id);
+            cartProductIds.Add(id);
 
-            return new RedirectResult("cart");
+            return Redirect("cart");
 
         }
 
@@ -68,45 +65,65 @@
             {
                 ViewData["visible"] = "bloc";
                 ViewData["title"] = "Login";
-                return FileViewResponse("account/login");
-            }
-
-            if (!Request.Cookies.HasCookies() || !Request.Cookies.ContainsCookie(".auth_cake"))
-            {
-                ViewData["title"] = "Login";
-                return FileViewResponse("account/login");
+                return View("account/login");
             }
 
             var shoppingCart = Request.Session.GetParameter<ShoppingCartViewModel>(ShoppingCartViewModel.SessionKey);
 
             if (!shoppingCart.ProductIds.Any())
             {
+                ViewData["showItems"] = "none";
                 ViewData["cartItems"] = "No items in your cart";
                 ViewData["totalCost"] = "$0.00";
+               
             }
             else
             {
+                if (Request.QueryData.ContainsKey("clear"))
+                {
+                    var clearedProductId = int.Parse(Request.QueryData["clear"].ToString());
+
+                    var indexToClear = shoppingCart.ProductIds.IndexOf(clearedProductId);
+
+                    shoppingCart.ProductIds.RemoveAt(indexToClear);
+
+                    Request.QueryData.Remove("clear");
+
+                    return Redirect("cart");
+                }
+
                 var productsInCart = _product
                     .FindProductsInCart(shoppingCart.ProductIds)
                     .ToList();
-
+                
                 var sb = new StringBuilder();
-
+                sb.Append(@"<div class=""row"">
+                    <div class=""col-sm-3""></div>
+                    <table class=""table table-bordered table-striped col-sm-6"">
+                    <tbody>
+                    <tr>
+                    <th scope=""col"">Name</th>
+                    <th scope=""col"">Price</th>
+                    <th scope=""col"">Clear</th>
+                    </tr>");
                 foreach (var model in productsInCart)
                 {
-                    sb.AppendLine($@"<tr><td>{model.Name}</td><td>${model.Price:F2}</td></tr>");
+                    sb.Append($@"<tr><td>{model.Name}</td><td>${model.Price:F2}</td><td><a class=""btn"" href=""cart?clear={model.Id}"">Clear</a></td></tr>");
                 }
+
+                sb.Append(@"</tbody></table><div class=""col-sm-3""></div></div>");
                
                 var totalPrice = productsInCart
                     .Sum(pr => pr.Price);
 
+                ViewData["showItems"] = "bloc";
                 ViewData["cartItems"] = sb.ToString().Trim();
                 ViewData["totalCost"] = $"{totalPrice:F2}";
             }
 
             ViewData["title"] = "My Cart";
 
-            return FileViewResponse("shopping/cart");
+            return View("shopping/cart");
         }
 
         public IHttpResponse FinishOrder()
@@ -115,15 +132,15 @@
             {
                 ViewData["visible"] = "bloc";
                 ViewData["title"] = "Login";
-                return FileViewResponse("account/login");
+                return View("account/login");
             }
 
-            var username = GetUsername();
+            var username = User;
 
             if (username == null)
             {
                 ViewData["title"] = "Login";
-                return FileViewResponse("account/login");
+                return View("account/login");
             }
 
             var shoppingCart = Request.Session.GetParameter<ShoppingCartViewModel>(ShoppingCartViewModel.SessionKey);
@@ -133,7 +150,7 @@
             var productIds = shoppingCart.ProductIds;
             if (!productIds.Any())
             {
-                return new RedirectResult("/");
+                return Redirect("/");
             }
 
             if (userId != null) _shopping.CreateOrder(userId.Value, productIds);
@@ -142,7 +159,7 @@
 
             ViewData["title"] = "Order Finished";
 
-            return FileViewResponse("shopping/order");
+            return View("shopping/order");
         }
 
         public IHttpResponse MyOrders()
@@ -151,12 +168,12 @@
             {
                 ViewData["visible"] = "bloc";
                 ViewData["title"] = "Login";
-                return FileViewResponse("account/login");
+                return View("account/login");
             }
 
             using (Db)
             {
-                var username = GetUsername();
+                var username = User;
 
                 var orders = Db.Orders
                     .Where(o => o.User.Username.Equals(username))
@@ -175,7 +192,7 @@
                 ViewData["orders"] = result.ToString().Trim();
                 ViewData["title"] = "My Orders";
 
-                return FileViewResponse("shopping/my-orders");
+                return View("shopping/my-orders");
             }
         }
 
@@ -185,12 +202,12 @@
             {
                 ViewData["visible"] = "bloc";
                 ViewData["title"] = "Login";
-                return FileViewResponse("account/login");
+                return View("account/login");
             }
 
             var orderParameter = Request.QueryData["id"].ToString().Trim();
             var orderId = int.Parse(orderParameter);
-            var username = GetUsername();
+            var username = User;
 
             using (Db)
             {
@@ -222,7 +239,7 @@
                 ViewData["orderDate"] = order.DateOfCreation.ToString("dd-MM-yyyy");
                 ViewData["title"] = $"Order {orderId} Details";
 
-                return FileViewResponse("shopping/details");
+                return View("shopping/details");
             }
         }
     }

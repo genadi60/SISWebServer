@@ -10,7 +10,7 @@
     using SIS.HTTP.Responses.Contracts;
     using ViewModels;
     using ViewModels.Account;
-    
+
     public class AccountController : BaseController
     {
         
@@ -25,7 +25,7 @@
         {
             SetDefaultViewData();
             ViewData["title"] = "Register";
-            return FileViewResponse("account/register");
+            return View("account/register");
         }
 
         public IHttpResponse DoRegister()
@@ -89,11 +89,10 @@
                 //TODO Log error
                 return ServerError(e.Message);
             }
-
-
+            
             //4.
             ViewData["title"] = "Home";
-            return FileViewResponse("home/index");
+            return View("home/index");
         }
 
         public IHttpResponse Login()
@@ -101,7 +100,7 @@
             SetDefaultViewData();
             ViewData["title"] = "Login";
 
-            return FileViewResponse("account/login");
+            return View("account/login");
         }
 
         public IHttpResponse DoLogin()
@@ -127,15 +126,18 @@
 
             var hashedPassword = HashService.Hash(password);
 
-            //var userName = Db.Users.FirstOrDefault(u => u.Username == username)?.Username;
-
-            bool isEqual = Db.Users.FirstOrDefault(u => u.Username.Equals(username)).Username.Equals(username);
-
-            if (!Db.Users.Any(u => u.Password.Equals(hashedPassword)) || !isEqual)
+            using (Db)
             {
-                var errorMessage = "Invalid username or password.";
-                return BadRequestError(errorMessage);
+                var user = Db.Users.FirstOrDefault(u => u.Username.Equals(username));
+                bool isEqual = user != null && user.Username.Equals(username);
+
+                if (!Db.Users.Any(u => u.Password.Equals(hashedPassword)) || !isEqual)
+                {
+                    var errorMessage = "Invalid username or password.";
+                    return BadRequestError(errorMessage);
+                }
             }
+            
 
             Request.Session.AddParameter(".auth_cake", username);
 
@@ -147,13 +149,11 @@
             ViewData["greeting"] = username;
             ViewData["searchTerm"] = null;
 
-            var response = FileViewResponse("home/index");
-
             var cookieContent = UserCookieService.GetUserCookie(username);
 
-            response.Cookies.Add(new HttpCookie(".auth_cake", $"{cookieContent}; {GlobalConstants.HttpOnly}", 7));
+            Response.Cookies.Add(new HttpCookie(".auth_cake", $"{cookieContent}; {GlobalConstants.HttpOnly}", 7));
 
-            return response;
+            return View("/");
 
         }
 
@@ -162,7 +162,7 @@
             if (!Request.Cookies.ContainsCookie(".auth_cake"))
             {
                 ViewData["title"] = "Home";
-                return FileViewResponse("home/index");
+                return View("home/index");
             }
 
             var cookie = Request.Cookies.GetCookie(".auth_cake");
@@ -173,7 +173,7 @@
             ViewData["title"] = "Home";
             ViewData["notAuthenticated"] = "bloc";
 
-            var response = FileViewResponse("home/index");
+            var response = View("home/index");
             response.Cookies.Add(cookie);
 
             return response;
@@ -185,16 +185,16 @@
             {
                 ViewData["visible"] = "bloc";
                 ViewData["title"] = "Login";
-                return FileViewResponse("account/login");
+                return View("account/login");
             }
 
             using (Db)
             {
-                var username = GetUsername();
+                var username = User;
 
                 if (username == null)
                 {
-                    return FileViewResponse("home/index");
+                    return View("home/index");
                 }
 
                 var user = Db.Users
@@ -202,7 +202,7 @@
 
                 if (user == null)
                 {
-                    return FileViewResponse("home/index");
+                    return View("home/index");
                 }
 
                 var registrationDate = user.DateOfRegistration.ToString("dd-MM-yyyy");
@@ -216,7 +216,7 @@
                 ViewData["profile"] = content;
                 ViewData["title"] = "My Profile";
 
-                return FileViewResponse("account/profile");
+                return View("account/profile");
             }
         }
     }

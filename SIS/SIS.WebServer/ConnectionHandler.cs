@@ -7,11 +7,12 @@
 
     using HTTP.Common;
     using HTTP.Cookies;
+    using HTTP.Enums;
     using HTTP.Requests;
     using HTTP.Requests.Contracts;
+    using HTTP.Responses;
     using HTTP.Responses.Contracts;
     using HTTP.Sessions;
-    using Results;
     using Routing;
     
     public class ConnectionHandler
@@ -85,7 +86,7 @@
             if (!_serverRoutingTable.Routes.ContainsKey(httpRequest.RequestMethod)
                 || !_serverRoutingTable.Routes[httpRequest.RequestMethod].ContainsKey(httpRequest.Path))
             {
-                return NotFound.PageNotFound();
+                return new HttpResponse(HttpResponseStatusCode.Not_Found);
             }
             var response = _serverRoutingTable.Routes[httpRequest.RequestMethod][httpRequest.Path].Invoke(httpRequest);
 

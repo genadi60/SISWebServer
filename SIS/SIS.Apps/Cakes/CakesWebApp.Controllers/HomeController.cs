@@ -5,42 +5,34 @@
 
     public class HomeController : BaseController
     {
-       public HomeController()
-        {
-           
-        }
         public IHttpResponse Index()
         {
-            IHttpResponse response = null;
-
             ViewData["title"] = "The Cake";
 
             if (IsAuthenticated())
             {
                 ViewData["authenticated"] = "bloc";
                 ViewData["notAuthenticated"] = "none";
-                ViewData["greeting"] = GetUsername();
+                ViewData["greeting"] = User;
                 ViewData["searchTerm"] = null;
                 Request.Session.AddParameter(ShoppingCartViewModel.SessionKey, new ShoppingCartViewModel());
 
-                response = FileViewResponse("/");
             }
             else
             {
                 ViewData["authenticated"] = "none";
                 ViewData["notAuthenticated"] = "bloc";
-                response = FileViewResponse("/");
-
+               
                 if (Request.Cookies.ContainsCookie(".auth_cake"))
                 {
                     var cookie = Request.Cookies.GetCookie(".auth_cake");
                     cookie.Delete();
                 
-                    response.Cookies.Add(cookie);
+                    Response.AddCookie(cookie);
                 }
             }
 
-            return response;
+            return View("/");
         }
 
         public IHttpResponse Hello()
@@ -49,10 +41,10 @@
             {
                 ViewData["visible"] = "bloc";
                 ViewData["title"] = "Login";
-                return FileViewResponse("account/login");
+                return View("account/login");
             }
 
-            var userName = GetUsername();
+            var userName = User;
             if (userName == null)
             {
                 ViewData["show"] = "none";
@@ -63,14 +55,14 @@
                 ViewData["greeting"] = userName;
             }
 
-            return FileViewResponse("account/hello");
+            return View("account/hello");
         }
 
         public IHttpResponse About()
         {
             IsAuthenticated();
             ViewData["title"] = "About Us";
-            return FileViewResponse("home/about");
+            return View("home/about");
         } 
     }
 }

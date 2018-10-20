@@ -1,28 +1,39 @@
-﻿namespace SIS.MvcFramework
+﻿using SIS.HTTP.Responses;
+using SIS.HTTP.Sessions;
+using SIS.HTTP.Sessions.Contracts;
+
+namespace SIS.MvcFramework
 {
     using System.Collections.Generic;
-    using System.IO;
     using System.Linq;
-
-    using HTTP.Responses.Contracts;
+    
+    using HTTP.Common;
     using HTTP.Enums;
+    using HTTP.Headers;
     using HTTP.Requests.Contracts;
+    using HTTP.Responses.Contracts;
     using Services;
     using Services.Contracts;
-    using WebServer.Results;
-    
+    using System.Text;
+
     public abstract class Controller
     {
         private const string ContentPlaceholder = "{{{content}}}";
+        private IHttpSession _session;
 
         protected Controller()
         {
             UserCookieService = new UserCookieService();
             HashService = new HashService();
-            ViewData = new Dictionary<string, string>
+            Response = new HttpResponse();
+            _session = HttpSessionStorage.GetSession("viewData");
+            if (!_session.ContainsParameter("viewData"))
             {
-                ["visible"] = "bloc"
-            };
+                _session.AddParameter("viewData", new Dictionary<string, string>());
+               
+            }
+            ViewData = (Dictionary<string, string>)_session.GetParameter("viewData");
+           
         }
 
         protected IUserCookieService UserCookieService { get; set; }
@@ -31,67 +42,99 @@
 
         public IHttpRequest Request { get; set; }
 
+        protected IHttpResponse Response { get; set; }
+
         protected Dictionary<string, string> ViewData { get; set; }
 
-        protected IHttpResponse FileViewResponse(string fileName)
+        protected string User
         {
-            if ("/".Equals(fileName))
+            get
             {
-                fileName = "home/index.html";
-            }
-            else
-            {
-                fileName = fileName + ".html";
-            }
-            
+                if (!Request.Cookies.HasCookies() || !Request.Cookies.ContainsCookie(".auth_cake"))
+                {
+                    return null;
+                }
 
-            var result = ProcessFileHtml(fileName);
-
-            return new HtmlResult(result, HttpResponseStatusCode.OK);
+                var cookie = Request.Cookies.GetCookie(".auth_cake");
+                var cookieContent = cookie.Value;
+                var userName = UserCookieService.GetUserData(cookieContent);
+                return userName;
+            }
         }
+
+        //protected IHttpResponse FileViewResponse(string fileName)
+        //{
+        //    var result = ProcessFileHtml(fileName);
+
+        //    return new HtmlResult(result, HttpResponseStatusCode.OK);
+        //}
 
         private string ProcessFileHtml(string fileName)
         {
-            var layoutHtml = File.ReadAllText("_layout.html");
+            if ("/".Equals(fileName))
+            {
+                fileName = GlobalConstants.HomeIndex + GlobalConstants.Html;
+            }
+            else
+            {
+                fileName = fileName + GlobalConstants.Html;
+            }
 
-            var fileHtml = File.ReadAllText(fileName);
+            var layoutHtml = System.IO.File.ReadAllText(GlobalConstants.Layout);
 
-            var result = layoutHtml.Replace(ContentPlaceholder, fileHtml);
+            var fileHtml = System.IO.File.ReadAllText(fileName);
+
+            var content = layoutHtml.Replace(ContentPlaceholder, fileHtml);
 
             if (ViewData.Any())
             {
                 foreach (var value in ViewData)
                 {
-                    result = result.Replace($"{{{{{{{value.Key}}}}}}}", value.Value);
+                    content = content.Replace($"{{{{{{{value.Key}}}}}}}", value.Value);
                 }
             }
 
-            return result;
+            return content;
         }
-        
-        protected string GetUsername()
+
+        protected IHttpResponse File(byte[] content)
         {
-            if (!Request.Cookies.ContainsCookie(".auth_cake"))
-            {
-                return null;
-            }
 
-            var cookie = Request.Cookies.GetCookie(".auth_cake");
+            Response.AddHeader(new HttpHeader(GlobalConstants.ContentDisposition, "inline"));
+            Response.StatusCode = HttpResponseStatusCode.OK;
+            Response.Content = content;
+            return Response;
+        }
 
-            var username = UserCookieService.DecryptString(cookie.Value);
+        protected IHttpResponse Redirect(string location)
+        {
+            Response.AddHeader(new HttpHeader(GlobalConstants.Location, location));
+            Response.StatusCode = HttpResponseStatusCode.See_Other;
+            return Response;
+        }
 
-            return username;
+        protected IHttpResponse Text(string content)
+        {
+            Response.AddHeader(new HttpHeader(GlobalConstants.ContentType, "text/plain; charset=utf-8"));
+            Response.StatusCode = HttpResponseStatusCode.OK;
+            Response.Content = Encoding.UTF8.GetBytes(content);
+            return Response;
+        }
+
+        private void PrepareHtmlResult(string content)
+        {
+            Response.Headers.Add(new HttpHeader(GlobalConstants.ContentType, "text/html; charset=utf-8"));
+            Response.StatusCode = HttpResponseStatusCode.OK;
+            Response.Content = Encoding.UTF8.GetBytes(content);
         }
 
         protected IHttpResponse View(string viewName)
         {
-            var path = viewName + ".html";
+            var content = ProcessFileHtml(viewName);
 
-            string content = File.ReadAllText(path);
+            PrepareHtmlResult(content);
 
-            var response = new HtmlResult(content, HttpResponseStatusCode.OK);
-
-            return response;
+            return Response;
         }
 
         protected IHttpResponse BadRequestError(string errorMessage)
@@ -99,23 +142,34 @@
             ViewData["errorMessage"] = errorMessage;
             ViewData["title"] = "Error";
             ViewData["visible"] = "none";
-            return FileViewResponse("error");
+            return View("error");
         }
 
         protected IHttpResponse ServerError(string errorMessage)
         {
             ViewData["errorMessage"] = errorMessage;
+            ViewData["title"] = "Error";
+            ViewData["visible"] = "none";
 
             var content = ProcessFileHtml("error");
-            
-            var response = new HtmlResult(content, HttpResponseStatusCode.Internal_Server_Error);
+            PrepareHtmlResult(content);
+            Response.StatusCode = HttpResponseStatusCode.Internal_Server_Error;
 
-            return response;
+            return Response;
+        }
+
+        public IHttpResponse NotFound()
+        {
+            ViewData["errorMessage"] = GlobalConstants.NotFoundPage;
+            ViewData["title"] = "Error";
+            ViewData["visible"] = "none";
+            Response.StatusCode = HttpResponseStatusCode.Not_Found;
+            return View("error");
         }
 
         protected bool IsAuthenticated()
         {
-            if(!Request.Cookies.HasCookies() || !Request.Cookies.ContainsCookie(".auth_cake") || !Request.Session.ContainsParameter(".auth_cake"))
+            if (!Request.Cookies.HasCookies() || !Request.Cookies.ContainsCookie(".auth_cake") || !Request.Session.ContainsParameter(".auth_cake"))
             {
                 ViewData["authenticated"] = "none";
                 ViewData["notAuthenticated"] = "bloc";
@@ -126,12 +180,12 @@
             ViewData["authenticated"] = "bloc";
             ViewData["notAuthenticated"] = "none";
             ViewData["visible"] = "bloc";
-            ViewData["greeting"] = GetUsername();
+            ViewData["greeting"] = User;
             if (!ViewData.ContainsKey("searchTerm"))
             {
                 ViewData["searchTerm"] = null;
             }
-            
+
             return true;
         }
 

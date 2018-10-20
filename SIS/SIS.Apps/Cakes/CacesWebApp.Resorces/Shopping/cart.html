@@ -1,43 +1,46 @@
 ﻿<h1>Your Cart</h1>
 <form method="get" action="/search">
+    <!--<a href="javascript:history.go(-1)" class="btn">Search more cakes</a>-->
     <a class="btn" href="/search">Search more cakes</a>
 </form>
-<div class="row">
+<!--<div style="display: {{{showItems}}}"class="row">
     <div class="col-sm-3"></div>
     <table class="table table-bordered table-striped col-sm-6">
         <tbody>
             <tr>
                 <th scope="col-sm-4">Name</th>
                 <th scope="col-sm-2">Price</th>
-            </tr>
+            </tr>-->
             {{{cartItems}}}
-        </tbody>
-    </table>
-    <div class="col-sm-3"></div>
-</div>
-<hr />
-Total Cost: ${{{totalCost}}}
-<hr />
-<form method="post" action="/shopping/order">
-    <input class="btn btn-outline-primary" type="submit" value="Finish Order" />
-</form>
-<hr />
-
-<!--<form method="get" action="/search">
-    <a class="btn" href="/search">Search more cakes</a>
-</form>
-<br />
-<div class="row">
-    <div class="col-md-3"></div>
-    <div class="col-md-6">
-        {{{cartItems}}}
-    </div>
-    <div class="col-md-3"></div>
-</div>
+<!--</tbody>
+</table>
+<div class="col-sm-3"></div>
+</div>-->
+<div style="display: {{{showItems}}}">
     <hr />
     Total Cost: ${{{totalCost}}}
     <hr />
     <form method="post" action="/shopping/order">
         <input class="btn btn-outline-primary" type="submit" value="Finish Order" />
     </form>
-    <hr />-->
+<hr />
+</div>
+
+    <!--<form method="get" action="/search">
+        <a class="btn" href="/search">Search more cakes</a>
+    </form>
+    <br />
+    <div class="row">
+        <div class="col-md-3"></div>
+        <div class="col-md-6">
+            {{{cartItems}}}
+        </div>
+        <div class="col-md-3"></div>
+    </div>
+        <hr />
+        Total Cost: ${{{totalCost}}}
+        <hr />
+        <form method="post" action="/shopping/order">
+            <input class="btn btn-outline-primary" type="submit" value="Finish Order" />
+        </form>
+        <hr />-->

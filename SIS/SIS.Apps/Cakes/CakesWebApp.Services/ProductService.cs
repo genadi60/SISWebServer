@@ -86,6 +86,7 @@
                         .Where(p => p.Id == id)
                         .Select(p => new ProductInCartViewModel
                         {
+                            Id = p.Id,
                             Name = p.Name,
                             Price = p.Price
                         })

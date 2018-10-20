@@ -18,6 +18,7 @@ namespace CakesWebApp
             collection.AddService<IHashService, HashService>();
             collection.AddService<IUserCookieService, UserCookieService>();
             collection.AddService<ILogger, FileLogger>();
+            
         }
     }
 }

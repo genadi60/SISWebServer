@@ -1,14 +1,12 @@
 ﻿namespace CakesWebApp.Controllers
 {
-    using System.Collections.Generic;
     using System.Globalization;
     using System.Linq;
     using System.Net;
     using System.Text;
-    
+
     using Services;
     using Services.Contracts;
-    using SIS.HTTP.Requests.Contracts;
     using SIS.HTTP.Responses.Contracts;
     using ViewModels;
     using ViewModels.Product;
@@ -16,23 +14,20 @@
     public class CakeController : BaseController
     {
         private readonly IProductService _productService = new ProductService();
-        public CakeController()
-        {
-        }
-        
+
         public IHttpResponse AddCake()
         {
             if (!IsAuthenticated())
             {
                 ViewData["visible"] = "bloc";
                 ViewData["title"] = "Login";
-                return FileViewResponse("account/login");
+                return View("account/login");
             }
-            
+
             ViewData["show"] = "none";
             ViewData["title"] = "Add Cake";
 
-            return FileViewResponse("products/add");
+            return View("products/add");
         }
 
         public IHttpResponse DoAddCake()
@@ -41,13 +36,13 @@
             {
                 ViewData["visible"] = "bloc";
                 ViewData["title"] = "Login";
-                return FileViewResponse("account/login");
+                return View("account/login");
             }
 
             var name = Request.FormData["name"].ToString().Trim();
             var price = decimal.Parse(Request.FormData["price"].ToString());
             var urlString = WebUtility.HtmlDecode(Request.FormData["imageUrl"].ToString());
-            
+
             if (string.IsNullOrWhiteSpace(name) || !IsAuthenticated())
             {
                 var errorMessage = "Please, provide valid product name.";
@@ -67,7 +62,7 @@
             ViewData["name"] = name;
             ViewData["price"] = price.ToString("F");
 
-            return FileViewResponse("products/add");
+            return View("products/add");
         }
 
         public IHttpResponse Search()
@@ -76,7 +71,7 @@
             {
                 ViewData["visible"] = "bloc";
                 ViewData["title"] = "Login";
-                return FileViewResponse("account/login");
+                return View("account/login");
             }
 
             const string searchTermKey = "searchTerm";
@@ -84,70 +79,60 @@
             var parameters = Request.QueryData;
             var shoppingCart = Request.Session.GetParameter<ShoppingCartViewModel>(ShoppingCartViewModel.SessionKey);
 
-            ViewData["title"] = "Search Cake";
-
-            if (parameters.Count == 0 && !shoppingCart.ProductIds.Any())
-            {
-                ViewData["showCart"] = "none";
-                ViewData["searchTerm"] = null;
-                ViewData["results"] = null;
-                return FileViewResponse("products/search");
-            }
-
-            ViewData["results"] = null;
-
             var searchTerm = parameters.ContainsKey(searchTermKey)
                 ? (string)parameters[searchTermKey]
                 : null;
 
-           ViewData[searchTermKey] = searchTerm;
+            bool isSearchKey = Request.Url.Contains(searchTermKey);
+
+            if (isSearchKey)
+            {
+                ViewData[searchTermKey] = searchTerm;
+            }
+
+            ViewData["title"] = "Search Cake";
+
+            if (searchTerm == null && string.IsNullOrEmpty(ViewData[searchTermKey]))
+            {
+                ViewData["showCart"] = "none";
+                ViewData["results"] = @"<h2 class=""text text-info"">Please, make a Choice.</h2>";
+                return View("products/search");
+            }
+
+            searchTerm = searchTerm ?? ViewData[searchTermKey];
+            ViewData[searchTermKey] = searchTerm;
 
             var allProducts = _productService.All(searchTerm);
 
             if (!allProducts.Any())
             {
-                ViewData["results"] = "No cakes found";
+                ViewData["results"] = @"<h2 class=""text text-info"">No cakes found.</h2>";
+                ViewData["showCart"] = "none";
             }
             else
             {
                 var sb = new StringBuilder();
-                sb.AppendLine(@"<div class=""container-fluid"">");
+                sb.AppendLine(@"<div class=""row""><div class=""col-sm-3""></div><table class=""table table-bordered table-striped col-sm-6 ""><tbody><tr><th scope=""col-sm-4"">Name</th><th scope=""col-sm-1"">Price</th><th scope=""col-sm-1"">Order</th></tr>");
 
                 foreach (var model in allProducts)
                 {
-                    sb.AppendLine($@"<div class=""form-group row""> 
-                        <div class=""col-sm-3""></div>
-                        <a class=""btn btn-outline-primary col-sm-4"" href=""/details?id={model.Id}"">{model.Name}</a>
-                        <div class=""col-sm-1"">
-                        <p>${model.Price}</p>
-                        </div>
-                        <form method=""get"" action=""shopping/add"" class=""col-sm-1"">
-                            <button type=""submit"" name=""id"" class=""btn btn-outline-primary"" value=""{model.Id}"">Order</button>
-                        </form>
-                        <div class=""col-sm-3""></div>
-                        </div>");
+                    sb.AppendLine($@"<tr ><td><a  class=""btn btn-outline-primary col-sm-12"" href=""/details?id={model.Id}"">{model.Name}</a></td><td><p>${model.Price:F2}</p></td><td><form method=""get"" action=""shopping/add"" class=""col-sm-1""><button type=""submit"" name=""id"" class=""btn btn-outline-primary"" value=""{model.Id}"">Order</button></form></td></tr>");
                 }
 
-                sb.AppendLine("</div>");
+                sb.AppendLine(@"</tbody></table><div class=""col-sm-3""></div></div>");
 
                 var result = sb.ToString().Trim();
+
                 ViewData["results"] = result;
             }
-            
-            ViewData["showCart"] = "none";
 
-            
+            var totalProducts = shoppingCart.ProductIds.Count;
+            var totalProductsText = totalProducts != 1 ? "products" : "product";
 
-            if (shoppingCart.ProductIds.Any())
-            {
-                var totalProducts = shoppingCart.ProductIds.Count;
-                var totalProductsText = totalProducts != 1 ? "products" : "product";
+            ViewData["showCart"] = "block";
+            ViewData["products"] = $"{totalProducts} {totalProductsText}";
 
-                ViewData["showCart"] = "block";
-                ViewData["products"] = $"{totalProducts} {totalProductsText}";
-            }
-
-            return FileViewResponse("products/search");
+            return View("products/search");
         }
 
         public IHttpResponse CakeDetails()
@@ -156,12 +141,12 @@
             {
                 ViewData["visible"] = "bloc";
                 ViewData["title"] = "Login";
-                return FileViewResponse("account/login");
+                return View("account/login");
             }
 
             var cakeId = Request.QueryData["id"].ToString().Trim();
             var id = int.Parse(cakeId);
-                
+
 
             if (string.IsNullOrWhiteSpace(cakeId))
 
@@ -176,7 +161,7 @@
             if (cake == null)
             {
                 ViewData["title"] = "Home";
-                return FileViewResponse("home/index");
+                return View("home/index");
             }
 
             var name = cake.Name.Trim();
@@ -188,8 +173,8 @@
             ViewData["cakePrice"] = price.ToString(CultureInfo.InvariantCulture);
             ViewData["pictureUrl"] = pictureUrl;
             ViewData["title"] = "Cake Details";
-            
-            return FileViewResponse("products/cakeDetails");
+
+            return View("products/cakeDetails");
         }
 
         public IHttpResponse GetCakes()
@@ -201,7 +186,7 @@
             if (cakes == null || cakes.Count == 0)
             {
                 ViewData["title"] = "Home";
-                return FileViewResponse("home/index");
+                return View("home/index");
             }
 
             var sb = new StringBuilder();
@@ -213,7 +198,7 @@
             ViewData["imgSources"] = sb.ToString().Trim();
             ViewData["title"] = "All Cakes";
 
-            return FileViewResponse("products/cakes");
+            return View("products/cakes");
         }
     }
 }
