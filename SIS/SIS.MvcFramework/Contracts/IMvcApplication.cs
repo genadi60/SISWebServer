@@ -1,10 +1,12 @@
 ﻿namespace SIS.MvcFramework.Contracts
 {
-    using SIS.MvcFramework.Services.Contracts;
+    using Services.Contracts;
+    using WebServer.Routing;
+
 
     public interface IMvcApplication
     {
-        void Configure();
+        void Configure(ServerRoutingTable routing);
 
         void ConfigureServices(IServiceCollection collection);
     }

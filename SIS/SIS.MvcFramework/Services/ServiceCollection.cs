@@ -8,7 +8,7 @@
     {
         public void AddService<TSource, TDestination>()
         {
-            throw new NotImplementedException();
+            
         }
 
         public T CreateInstance<T>()
