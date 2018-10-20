@@ -8,6 +8,7 @@
     using SIS.HTTP.Common;
     using SIS.HTTP.Cookies;
     using SIS.HTTP.Responses.Contracts;
+    using SIS.MvcFramework;
     using ViewModels;
     using ViewModels.Account;
 
@@ -21,6 +22,7 @@
             _userService = new UserService();
         }
 
+        [HttpGet("/register")]
         public IHttpResponse Register()
         {
             SetDefaultViewData();
@@ -28,6 +30,7 @@
             return View("account/register");
         }
 
+        [HttpPost("/register")]
         public IHttpResponse DoRegister()
         {
             SetDefaultViewData();
@@ -95,6 +98,7 @@
             return View("home/index");
         }
 
+        [HttpGet("/login")]
         public IHttpResponse Login()
         {
             SetDefaultViewData();
@@ -103,6 +107,7 @@
             return View("account/login");
         }
 
+        [HttpPost("/login")]
         public IHttpResponse DoLogin()
         {
             string username = null;
@@ -157,6 +162,7 @@
 
         }
 
+        [HttpGet("/logout")]
         public IHttpResponse Logout()
         {
             if (!Request.Cookies.ContainsCookie(".auth_cake"))
@@ -179,6 +185,7 @@
             return response;
         }
 
+        [HttpGet("/profile")]
         public IHttpResponse GetProfile()
         {
             if (!IsAuthenticated())

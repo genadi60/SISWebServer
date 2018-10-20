@@ -1,10 +1,12 @@
 ﻿namespace CakesWebApp.Controllers
 {
     using SIS.HTTP.Responses.Contracts;
+    using SIS.MvcFramework;
     using ViewModels;
 
     public class HomeController : BaseController
     {
+        [HttpGet("/")]
         public IHttpResponse Index()
         {
             ViewData["title"] = "The Cake";
@@ -35,6 +37,7 @@
             return View("/");
         }
 
+        [HttpGet("/hello")]
         public IHttpResponse Hello()
         {
             if (!IsAuthenticated())
@@ -58,6 +61,7 @@
             return View("account/hello");
         }
 
+        [HttpGet("/about")]
         public IHttpResponse About()
         {
             IsAuthenticated();

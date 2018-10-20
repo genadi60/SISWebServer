@@ -1,6 +1,4 @@
-﻿using System.Collections.Generic;
-
-namespace CakesWebApp.Controllers
+﻿namespace CakesWebApp.Controllers
 {
     using System.Globalization;
     using System.Linq;
@@ -10,13 +8,15 @@ namespace CakesWebApp.Controllers
     using Services;
     using Services.Contracts;
     using SIS.HTTP.Responses.Contracts;
+    using SIS.MvcFramework;
     using ViewModels;
     using ViewModels.Product;
-
+    
     public class CakeController : BaseController
     {
         private readonly IProductService _productService = new ProductService();
 
+        [HttpGet("/add")]
         public IHttpResponse AddCake()
         {
             if (!IsAuthenticated())
@@ -32,6 +32,7 @@ namespace CakesWebApp.Controllers
             return View("products/add");
         }
 
+        [HttpPost("/add")]
         public IHttpResponse DoAddCake()
         {
             if (!IsAuthenticated())
@@ -67,6 +68,7 @@ namespace CakesWebApp.Controllers
             return View("products/add");
         }
 
+        [HttpGet("/search")]
         public IHttpResponse Search()
         {
             if (!IsAuthenticated())
@@ -137,6 +139,7 @@ namespace CakesWebApp.Controllers
             return View("products/search");
         }
 
+        [HttpGet("/details")]
         public IHttpResponse CakeDetails()
         {
             if (!IsAuthenticated())
@@ -179,6 +182,7 @@ namespace CakesWebApp.Controllers
             return View("products/cakeDetails");
         }
 
+        [HttpGet("/cakes")]
         public IHttpResponse GetCakes()
         {
             IsAuthenticated();

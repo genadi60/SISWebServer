@@ -1,4 +1,6 @@
-﻿namespace CakesWebApp.Controllers
+﻿using SIS.MvcFramework;
+
+namespace CakesWebApp.Controllers
 {
     using System.Linq;
     using System.Text;
@@ -23,6 +25,7 @@
             _shopping = new ShoppingService();
         }
 
+        [HttpGet("/shopping/add")]
         public IHttpResponse AddToCart()
         {
             if (!IsAuthenticated())
@@ -59,6 +62,7 @@
 
         }
 
+        [HttpGet("/shopping/cart")]
         public IHttpResponse ShowCart()
         {
             if (!IsAuthenticated())
@@ -126,6 +130,7 @@
             return View("shopping/cart");
         }
 
+        [HttpPost("/shopping/order")]
         public IHttpResponse FinishOrder()
         {
             if (!IsAuthenticated())
@@ -162,6 +167,7 @@
             return View("shopping/order");
         }
 
+        [HttpGet("/shopping/my-orders")]
         public IHttpResponse MyOrders()
         {
             if (!IsAuthenticated())
@@ -196,6 +202,7 @@
             }
         }
 
+        [HttpGet("/list")]
         public IHttpResponse Details()
         {
             if (!IsAuthenticated())
