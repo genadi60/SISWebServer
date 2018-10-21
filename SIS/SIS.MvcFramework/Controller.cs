@@ -72,9 +72,9 @@ namespace SIS.MvcFramework
                 fileName = fileName + GlobalConstants.Html;
             }
 
-            var layoutHtml = System.IO.File.ReadAllText(GlobalConstants.Layout);
+            var layoutHtml = System.IO.File.ReadAllText(GlobalConstants.Resources + GlobalConstants.Layout);
 
-            var fileHtml = System.IO.File.ReadAllText(fileName);
+            var fileHtml = System.IO.File.ReadAllText(GlobalConstants.Resources + fileName);
 
             var content = layoutHtml.Replace(ContentPlaceholder, fileHtml);
 

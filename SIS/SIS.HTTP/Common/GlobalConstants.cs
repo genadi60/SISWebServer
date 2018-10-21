@@ -34,6 +34,8 @@
 
         public const string Html = ".html";
 
+        public const string Resources = "Resources/";
+
         public const string HomeIndex = "home/index";
 
         public const string Layout = "_layout.html";
