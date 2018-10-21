@@ -1,16 +1,17 @@
-﻿using System;
-using System.Linq;
-using CakesWebApp.Services;
-using CakesWebApp.Services.Contracts;
-using CakesWebApp.ViewModels;
-using CakesWebApp.ViewModels.Account;
-using SIS.HTTP.Common;
-using SIS.HTTP.Cookies;
-using SIS.HTTP.Responses.Contracts;
-using SIS.MvcFramework.Attributes;
-
-namespace CakesWebApp.Controllers
+﻿namespace CakesWebApp.Controllers
 {
+    using System;
+    using System.Linq;
+
+    using Services;
+    using Services.Contracts;
+    using SIS.HTTP.Common;
+    using SIS.HTTP.Cookies;
+    using SIS.HTTP.Responses.Contracts;
+    using SIS.MvcFramework.Attributes;
+    using ViewModels;
+    using ViewModels.Account;
+    
     public class AccountController : BaseController
     {
         

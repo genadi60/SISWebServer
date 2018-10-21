@@ -1,8 +1,10 @@
-﻿using CakesWebApp.Models;
-using Microsoft.EntityFrameworkCore;
-
-namespace CakesWebApp.Data
+﻿namespace CakesWebApp.Data
 {
+    using Microsoft.EntityFrameworkCore;
+
+    using Models;
+
+
     public class CakesDbContext : DbContext
     {
         public CakesDbContext(DbContextOptions options) : base(options)

@@ -13,7 +13,7 @@
         {
             Console.OutputEncoding = Encoding.UTF8;
 
-            ////InitializeDatabase();
+            InitializeDatabase();
 
             WebHost.Start(new Startup());
         }

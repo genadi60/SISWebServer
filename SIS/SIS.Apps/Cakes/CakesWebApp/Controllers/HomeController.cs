@@ -1,10 +1,9 @@
-﻿using CakesWebApp.ViewModels;
-using SIS.HTTP.Responses.Contracts;
-using SIS.MvcFramework;
-using SIS.MvcFramework.Attributes;
-
-namespace CakesWebApp.Controllers
+﻿namespace CakesWebApp.Controllers
 {
+    using SIS.HTTP.Responses.Contracts;
+    using SIS.MvcFramework.Attributes;
+    using ViewModels;
+
     public class HomeController : BaseController
     {
         [HttpGet("/")]

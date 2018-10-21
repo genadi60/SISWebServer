@@ -1,8 +1,8 @@
-﻿using CakesWebApp.Data;
-using SIS.MvcFramework;
-
-namespace CakesWebApp.Controllers
+﻿namespace CakesWebApp.Controllers
 {
+    using Data;
+    using SIS.MvcFramework;
+
     public abstract class BaseController : Controller
     {
         protected BaseController()

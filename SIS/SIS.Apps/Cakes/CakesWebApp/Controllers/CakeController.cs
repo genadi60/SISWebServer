@@ -1,16 +1,17 @@
-﻿using System.Globalization;
-using System.Linq;
-using System.Net;
-using System.Text;
-using CakesWebApp.Services;
-using CakesWebApp.Services.Contracts;
-using CakesWebApp.ViewModels;
-using CakesWebApp.ViewModels.Product;
-using SIS.HTTP.Responses.Contracts;
-using SIS.MvcFramework.Attributes;
-
-namespace CakesWebApp.Controllers
+﻿namespace CakesWebApp.Controllers
 {
+    using System.Globalization;
+    using System.Linq;
+    using System.Net;
+    using System.Text;
+
+    using Services;
+    using Services.Contracts;
+    using SIS.HTTP.Responses.Contracts;
+    using SIS.MvcFramework.Attributes;
+    using ViewModels;
+    using ViewModels.Product;
+    
     public class CakeController : BaseController
     {
         private readonly IProductService _productService = new ProductService();

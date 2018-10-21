@@ -1,8 +1,8 @@
-﻿using System;
-using Microsoft.EntityFrameworkCore.Migrations;
-
-namespace CakesWebApp.Data.Migrations
+﻿namespace CakesWebApp.Data.Migrations
 {
+    using System;
+    using Microsoft.EntityFrameworkCore.Migrations;
+
     public partial class Initial : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -11,10 +11,10 @@ namespace CakesWebApp.Data.Migrations
                 name: "Products",
                 columns: table => new
                 {
-                    Id = table.Column<int>(nullable: false)
+                    Id = table.Column<int>()
                         .Annotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn),
                     Name = table.Column<string>(nullable: true),
-                    Price = table.Column<decimal>(nullable: false),
+                    Price = table.Column<decimal>(),
                     ImageUrl = table.Column<string>(nullable: true)
                 },
                 constraints: table =>
@@ -26,12 +26,12 @@ namespace CakesWebApp.Data.Migrations
                 name: "Users",
                 columns: table => new
                 {
-                    Id = table.Column<int>(nullable: false)
+                    Id = table.Column<int>()
                         .Annotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn),
                     Name = table.Column<string>(nullable: true),
                     Username = table.Column<string>(nullable: true),
                     Password = table.Column<string>(nullable: true),
-                    DateOfRegistration = table.Column<DateTime>(nullable: false)
+                    DateOfRegistration = table.Column<DateTime>()
                 },
                 constraints: table =>
                 {
@@ -42,10 +42,10 @@ namespace CakesWebApp.Data.Migrations
                 name: "Orders",
                 columns: table => new
                 {
-                    Id = table.Column<int>(nullable: false)
+                    Id = table.Column<int>()
                         .Annotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn),
-                    UserId = table.Column<int>(nullable: false),
-                    DateOfCreation = table.Column<DateTime>(nullable: false)
+                    UserId = table.Column<int>(),
+                    DateOfCreation = table.Column<DateTime>()
                 },
                 constraints: table =>
                 {
@@ -62,10 +62,10 @@ namespace CakesWebApp.Data.Migrations
                 name: "OrderProducts",
                 columns: table => new
                 {
-                    Id = table.Column<int>(nullable: false)
+                    Id = table.Column<int>()
                         .Annotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn),
-                    OrderId = table.Column<int>(nullable: false),
-                    ProductId = table.Column<int>(nullable: false),
+                    OrderId = table.Column<int>(),
+                    ProductId = table.Column<int>(),
                     UserId = table.Column<int>(nullable: true)
                 },
                 constraints: table =>
