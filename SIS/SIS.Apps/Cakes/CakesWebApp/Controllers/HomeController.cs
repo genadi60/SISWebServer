@@ -1,11 +1,18 @@
-﻿namespace CakesWebApp.Controllers
+﻿using CakesWebApp.ViewModels;
+using SIS.MvcFramework.Services.Contracts;
+
+namespace CakesWebApp.Controllers
 {
     using SIS.HTTP.Responses.Contracts;
     using SIS.MvcFramework.Attributes;
-    using ViewModels;
 
     public class HomeController : BaseController
     {
+        public HomeController()
+        {
+            
+        }
+
         [HttpGet("/")]
         public IHttpResponse Index()
         {

@@ -1,4 +1,7 @@
-﻿namespace CakesWebApp.Controllers
+﻿using CakesWebApp.ViewModels;
+using CakesWebApp.ViewModels.Account;
+
+namespace CakesWebApp.Controllers
 {
     using System;
     using System.Linq;
@@ -9,17 +12,16 @@
     using SIS.HTTP.Cookies;
     using SIS.HTTP.Responses.Contracts;
     using SIS.MvcFramework.Attributes;
-    using ViewModels;
-    using ViewModels.Account;
-    
+    using SIS.MvcFramework.Services.Contracts;
+
     public class AccountController : BaseController
     {
         
         private readonly IUserService _userService;
         
-        public AccountController()
+        public AccountController(UserService userService)
         {
-            _userService = new UserService();
+            _userService = userService;
         }
 
         [HttpGet("/register")]
@@ -101,6 +103,13 @@
         [HttpGet("/login")]
         public IHttpResponse Login()
         {
+            if (Request.Cookies.ContainsCookie(".auth_cake"))
+            {
+                
+                //ViewData["title"] = "Home";
+                return BadRequestError("You are now logged!");
+            }
+
             SetDefaultViewData();
             ViewData["title"] = "Login";
 
@@ -167,6 +176,7 @@
         {
             if (!Request.Cookies.ContainsCookie(".auth_cake"))
             {
+                SetDefaultViewData();
                 ViewData["title"] = "Home";
                 return View("home/index");
             }

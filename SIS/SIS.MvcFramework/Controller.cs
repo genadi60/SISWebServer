@@ -1,6 +1,7 @@
 ﻿using SIS.HTTP.Responses;
 using SIS.HTTP.Sessions;
 using SIS.HTTP.Sessions.Contracts;
+using SIS.MvcFramework.Logger.Contracts;
 
 namespace SIS.MvcFramework
 {
@@ -23,9 +24,7 @@ namespace SIS.MvcFramework
 
         protected Controller()
         {
-            UserCookieService = new UserCookieService();
-            HashService = new HashService();
-            Response = new HttpResponse();
+            Response = new HttpResponse {StatusCode = HttpResponseStatusCode.OK};
             _session = HttpSessionStorage.GetSession("viewData");
             if (!_session.ContainsParameter("viewData"))
             {
@@ -35,9 +34,9 @@ namespace SIS.MvcFramework
             ViewData = (Dictionary<string, string>)_session.GetParameter("viewData");
         }
 
-        protected IUserCookieService UserCookieService { get; set; }
+        public IUserCookieService UserCookieService { get; internal set; }
 
-        protected IHashService HashService { get; set; }
+        public IHashService HashService { get; internal set; }
 
         public IHttpRequest Request { get; set; }
 
@@ -72,9 +71,9 @@ namespace SIS.MvcFramework
                 fileName = fileName + GlobalConstants.Html;
             }
 
-            var layoutHtml = System.IO.File.ReadAllText(GlobalConstants.Resources + GlobalConstants.Layout);
+            var layoutHtml = System.IO.File.ReadAllText(GlobalConstants.View + GlobalConstants.Layout);
 
-            var fileHtml = System.IO.File.ReadAllText(GlobalConstants.Resources + fileName);
+            var fileHtml = System.IO.File.ReadAllText(GlobalConstants.View + fileName);
 
             var content = layoutHtml.Replace(ContentPlaceholder, fileHtml);
 

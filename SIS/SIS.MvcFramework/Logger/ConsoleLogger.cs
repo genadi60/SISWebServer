@@ -1,12 +1,14 @@
 ﻿namespace SIS.MvcFramework.Logger
 {
-    using SIS.MvcFramework.Logger.Contracts;
+    using System;
+
+    using Contracts;
 
     public class ConsoleLogger : ILogger
     {
         public void Log(string message)
         {
-            throw new System.NotImplementedException();
+            Console.WriteLine(message);
         }
     }
 }

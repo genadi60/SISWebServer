@@ -1,7 +1,7 @@
-﻿namespace CakesWebApp.Services.Contracts
-{
-    using ViewModels.Account;
+﻿using CakesWebApp.ViewModels.Account;
 
+namespace CakesWebApp.Services.Contracts
+{
     public interface IUserService
     {
         bool Create(RegisterViewModel model);

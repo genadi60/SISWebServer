@@ -1,8 +1,8 @@
-﻿namespace CakesWebApp.Services.Contracts
+﻿using CakesWebApp.ViewModels.Product;
+
+namespace CakesWebApp.Services.Contracts
 {
     using System.Collections.Generic;
-
-    using ViewModels.Product;
 
     public interface IProductService
     {

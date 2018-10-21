@@ -1,4 +1,6 @@
-﻿namespace SIS.MvcFramework.Services
+﻿using SIS.MvcFramework.Logger.Contracts;
+
+namespace SIS.MvcFramework.Services
 {
     using System;
     using System.IO;
@@ -9,7 +11,13 @@
 
     public class UserCookieService : IUserCookieService
     {
+        private readonly ILogger _logger;
         private const string EncryptKey = "E746C8DF278CD5931069B522E695D4F2";
+
+        public UserCookieService(ILogger logger)
+        {
+            _logger = logger;
+        }
         public string GetUserCookie(string userName)
         {
             var cookieContent = EncryptString(userName);
@@ -18,6 +26,7 @@
 
         public string GetUserData(string cookieContent)
         {
+            _logger.Log("GetUserData(): " + cookieContent);
             var userName = DecryptString(cookieContent);
             return userName;
         }

@@ -1,4 +1,6 @@
-﻿namespace CakesWebApp.Services
+﻿using CakesWebApp.ViewModels.Product;
+
+namespace CakesWebApp.Services
 {
     using System.Collections.Generic;
     using System.Linq;
@@ -6,7 +8,7 @@
     using Contracts;
     using Data;
     using Models;
-    using ViewModels.Product;
+
     public class ProductService : IProductService
     {
         public void Create(AddProductViewModel model)

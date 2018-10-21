@@ -1,4 +1,7 @@
-﻿namespace CakesWebApp.Controllers
+﻿using CakesWebApp.ViewModels;
+using CakesWebApp.ViewModels.Product;
+
+namespace CakesWebApp.Controllers
 {
     using System.Linq;
     using System.Text;
@@ -7,20 +10,19 @@
     using Services.Contracts;
     using SIS.HTTP.Responses.Contracts;
     using SIS.MvcFramework.Attributes;
-    using ViewModels;
-    using ViewModels.Product;
-    
+    using SIS.MvcFramework.Services.Contracts;
+
     public class ShoppingController : BaseController
     {
         private readonly IUserService _user;
         private readonly IProductService _product;
         private readonly IShoppingService _shopping;
         
-        public ShoppingController()
+        public ShoppingController(UserService userService, ProductService productService, ShoppingService shoppingService)
         {
-            _user = new UserService();
-            _product = new ProductService();
-            _shopping = new ShoppingService();
+            _user = userService;
+            _product = productService;
+            _shopping = shoppingService;
         }
 
         [HttpGet("/shopping/add")]

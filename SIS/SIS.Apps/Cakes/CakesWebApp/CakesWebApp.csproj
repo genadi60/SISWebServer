@@ -16,52 +16,52 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Update="Resources\Account\hello.html">
+    <None Update="Views\Account\hello.html">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Update="Resources\Account\login.html">
+    <None Update="Views\Account\login.html">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Update="Resources\Account\profile.html">
+    <None Update="Views\Account\profile.html">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Update="Resources\Account\register.html">
+    <None Update="Views\Account\register.html">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Update="Resources\error.html">
+    <None Update="Views\error.html">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Update="Resources\Home\about.html">
+    <None Update="Views\Home\about.html">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Update="Resources\Home\index.html">
+    <None Update="Views\Home\index.html">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Update="Resources\Products\add.html">
+    <None Update="Views\Products\add.html">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Update="Resources\Products\cakeDetails.html">
+    <None Update="Views\Products\cakeDetails.html">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Update="Resources\Products\cakes.html">
+    <None Update="Views\Products\cakes.html">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Update="Resources\Products\search.html">
+    <None Update="Views\Products\search.html">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Update="Resources\Shopping\cart.html">
+    <None Update="Views\Shopping\cart.html">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Update="Resources\Shopping\details.html">
+    <None Update="Views\Shopping\details.html">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Update="Resources\Shopping\my-orders.html">
+    <None Update="Views\Shopping\my-orders.html">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Update="Resources\Shopping\order.html">
+    <None Update="Views\Shopping\order.html">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Update="Resources\_layout.html">
+    <None Update="Views\_layout.html">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
   </ItemGroup>

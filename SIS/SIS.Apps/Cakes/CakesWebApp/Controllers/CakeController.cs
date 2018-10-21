@@ -1,4 +1,7 @@
-﻿namespace CakesWebApp.Controllers
+﻿using CakesWebApp.ViewModels;
+using CakesWebApp.ViewModels.Product;
+
+namespace CakesWebApp.Controllers
 {
     using System.Globalization;
     using System.Linq;
@@ -9,12 +12,16 @@
     using Services.Contracts;
     using SIS.HTTP.Responses.Contracts;
     using SIS.MvcFramework.Attributes;
-    using ViewModels;
-    using ViewModels.Product;
-    
+    using SIS.MvcFramework.Services.Contracts;
+
     public class CakeController : BaseController
     {
-        private readonly IProductService _productService = new ProductService();
+        private readonly IProductService _productService;
+
+        public CakeController(ProductService productService)
+        {
+            _productService = productService;
+        }
 
         [HttpGet("/add")]
         public IHttpResponse AddCake()

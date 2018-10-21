@@ -1,11 +1,12 @@
-﻿namespace CakesWebApp.Services
+﻿using CakesWebApp.ViewModels.Account;
+
+namespace CakesWebApp.Services
 {
     using System.Linq;
 
     using Contracts;
     using Data;
     using Models;
-    using ViewModels.Account;
 
     public class UserService : IUserService
     {
