@@ -1,13 +1,13 @@
-﻿using CakesWebApp.ViewModels.Product;
-
-namespace CakesWebApp.Services
+﻿namespace CakesWebApp.Services
 {
     using System.Collections.Generic;
     using System.Linq;
+    using System.Net;
 
     using Contracts;
     using Data;
     using Models;
+    using ViewModels.Product;
 
     public class ProductService : IProductService
     {
@@ -18,8 +18,8 @@ namespace CakesWebApp.Services
                 var product = new Product
                 {
                     Name = model.Name,
-                    Price = model.Price,
-                    ImageUrl = model.ImageUrl
+                    Price = decimal.Parse(model.Price),
+                    ImageUrl = WebUtility.HtmlDecode(model.ImageUrl)
                 };
 
                 db.Add(product);
@@ -42,9 +42,9 @@ namespace CakesWebApp.Services
                 return resultsQuery
                     .Select(pr => new ProductListingViewModel
                     {
-                        Id = pr.Id,
+                        Id = pr.Id.ToString(),
                         Name = pr.Name,
-                        Price = pr.Price
+                        Price = pr.Price.ToString()
                     })
                     .ToList();
             }
@@ -60,7 +60,7 @@ namespace CakesWebApp.Services
                     .Select(pr => new ProductDetailsViewModel
                     {
                         Name = pr.Name,
-                        Price = pr.Price,
+                        Price = pr.Price.ToString(),
                         ImageUrl = pr.ImageUrl
                     })
                     .FirstOrDefault();
@@ -88,9 +88,9 @@ namespace CakesWebApp.Services
                         .Where(p => p.Id == id)
                         .Select(p => new ProductInCartViewModel
                         {
-                            Id = p.Id,
+                            Id = p.Id.ToString(),
                             Name = p.Name,
-                            Price = p.Price
+                            Price = p.Price.ToString()
                         })
                         .FirstOrDefault();
 
@@ -109,7 +109,7 @@ namespace CakesWebApp.Services
                 return db.Products
                     .Select(pr => new ProductShowViewModel
                     {
-                        Id = pr.Id,
+                        Id = pr.Id.ToString(),
                         Name = pr.Name,
                         ImageUrl = pr.ImageUrl
                     })

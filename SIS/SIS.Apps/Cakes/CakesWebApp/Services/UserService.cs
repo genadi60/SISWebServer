@@ -47,14 +47,13 @@ namespace CakesWebApp.Services
         {
             using (var db = new CakesDbContext())
             {
-                return db
-                    .Users
+                return db.Users
                     .Where(u => u.Username == username)
                     .Select(u => new ProfileViewModel
                     {
                         Username = u.Username,
-                        RegistrationDate = u.DateOfRegistration,
-                        TotalOrders = u.Orders.Count()
+                        RegistrationDate = u.DateOfRegistration.ToString("dd-MM-yyyy"),
+                        TotalOrders = u.Orders.Count().ToString()
                     })
                     .FirstOrDefault();
             }

@@ -26,7 +26,7 @@ namespace CakesWebApp.Controllers
         }
 
         [HttpGet("/shopping/add")]
-        public IHttpResponse AddToCart()
+        public IHttpResponse AddToCart(ProductInCartViewModel model)
         {
             if (!IsAuthenticated())
             {
@@ -118,7 +118,7 @@ namespace CakesWebApp.Controllers
                 sb.Append(@"</tbody></table><div class=""col-sm-3""></div></div>");
                
                 var totalPrice = productsInCart
-                    .Sum(pr => pr.Price);
+                    .Sum(pr => decimal.Parse(pr.Price));
 
                 ViewData["showItems"] = "bloc";
                 ViewData["cartItems"] = sb.ToString().Trim();
@@ -228,9 +228,9 @@ namespace CakesWebApp.Controllers
                 var products = order.Products
                     .Select(o => new ProductListingViewModel()
                     {
-                        Id = o.ProductId,
+                        Id = o.ProductId.ToString(),
                         Name = o.Product.Name,
-                        Price = o.Product.Price
+                        Price = o.Product.Price.ToString()
                     })
                     .ToList();
 

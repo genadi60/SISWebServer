@@ -1,4 +1,6 @@
-﻿namespace SIS.MvcFramework
+﻿using System.Collections.Generic;
+
+namespace SIS.MvcFramework
 {
     using System;
     using System.Linq;
@@ -74,7 +76,40 @@
             controllerInstance.UserCookieService = serviceCollection.CreateInstance<IUserCookieService>();
             controllerInstance.HashService = serviceCollection.CreateInstance<IHashService>();
 
-            var httpResponse = methodInfo.Invoke(controllerInstance, new object[] { }) as IHttpResponse;
+            var methodParameters = methodInfo.GetParameters();
+            var methodParametersObjects = new List<object>();
+
+            foreach (var methodParameter in methodParameters)
+            {
+                var type = methodParameter.ParameterType;
+                var methodParameterObject = serviceCollection.CreateInstance(type);
+                var properties = type.GetProperties();
+
+                foreach (var propertyInfo in properties)
+                {
+                    var key = propertyInfo.Name.ToLower();
+                    object value = null;
+                    if (request.FormData.Any(k => k.Key.ToLower() == key))
+                    {
+                        value = request.FormData.First(k => k.Key.ToLower() == key).Value;
+                       
+                    }
+
+                    else if (request.QueryData.Any(k => k.Key.ToLower() == key))
+                    {
+                        value = request.QueryData.First(k => k.Key.ToLower() == key).Value;
+                    }
+
+                    if (value != null)
+                    {
+                        propertyInfo.SetMethod.Invoke(methodParameterObject, new object[]{value.ToString().Trim()});
+                    }
+                }
+
+                methodParametersObjects.Add(methodParameterObject);
+            }
+
+            var httpResponse = methodInfo.Invoke(controllerInstance, methodParametersObjects.ToArray()) as IHttpResponse;
 
             
             return httpResponse;

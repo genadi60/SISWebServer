@@ -1,18 +1,15 @@
-﻿using CakesWebApp.ViewModels;
-using CakesWebApp.ViewModels.Product;
-
-namespace CakesWebApp.Controllers
+﻿namespace CakesWebApp.Controllers
 {
     using System.Globalization;
     using System.Linq;
-    using System.Net;
     using System.Text;
-
+    
     using Services;
     using Services.Contracts;
     using SIS.HTTP.Responses.Contracts;
     using SIS.MvcFramework.Attributes;
-    using SIS.MvcFramework.Services.Contracts;
+    using ViewModels;
+    using ViewModels.Product;
 
     public class CakeController : BaseController
     {
@@ -40,7 +37,7 @@ namespace CakesWebApp.Controllers
         }
 
         [HttpPost("/add")]
-        public IHttpResponse DoAddCake()
+        public IHttpResponse DoAddCake(AddProductViewModel model)
         {
             if (!IsAuthenticated())
             {
@@ -49,28 +46,17 @@ namespace CakesWebApp.Controllers
                 return View("account/login");
             }
 
-            var name = Request.FormData["name"].ToString().Trim();
-            var price = decimal.Parse(Request.FormData["price"].ToString());
-            var urlString = WebUtility.HtmlDecode(Request.FormData["imageUrl"].ToString());
-
-            if (string.IsNullOrWhiteSpace(name) || !IsAuthenticated())
+            if (string.IsNullOrWhiteSpace(model.Name) || !IsAuthenticated())
             {
                 var errorMessage = "Please, provide valid product name.";
                 return BadRequestError(errorMessage);
             }
 
-            var addProductModel = new AddProductViewModel
-            {
-                Name = name,
-                Price = price,
-                ImageUrl = urlString
-            };
-
-            _productService.Create(addProductModel);
+            _productService.Create(model);
 
             ViewData["show"] = "display";
-            ViewData["name"] = name;
-            ViewData["price"] = price.ToString("F");
+            ViewData["name"] = model.Name;
+            ViewData["price"] = model.Price;
 
             return View("products/add");
         }
@@ -127,7 +113,7 @@ namespace CakesWebApp.Controllers
 
                 foreach (var model in allProducts)
                 {
-                    sb.AppendLine($@"<tr ><td><a  class=""btn btn-outline-primary col-sm-12"" href=""/details?id={model.Id}"">{model.Name}</a></td><td><p>${model.Price:F2}</p></td><td><form method=""get"" action=""shopping/add"" class=""col-sm-1""><button type=""submit"" name=""id"" class=""btn btn-outline-primary"" value=""{model.Id}"">Order</button></form></td></tr>");
+                    sb.AppendLine($@"<tr ><td><a  class=""btn btn-outline-primary col-sm-12"" href=""/details?id={model.Id}"">{model.Name}</a></td><td><p>${model.Price}</p></td><td><form method=""get"" action=""shopping/add"" class=""col-sm-1""><button type=""submit"" name=""id"" class=""btn btn-outline-primary"" value=""{model.Id}"">Order</button></form></td></tr>");
                 }
 
                 sb.AppendLine(@"</tbody></table><div class=""col-sm-3""></div></div>");
@@ -147,7 +133,7 @@ namespace CakesWebApp.Controllers
         }
 
         [HttpGet("/details")]
-        public IHttpResponse CakeDetails()
+        public IHttpResponse CakeDetails(ProductShowViewModel model)
         {
             if (!IsAuthenticated())
             {
