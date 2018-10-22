@@ -1,17 +1,17 @@
-﻿using CakesWebApp.ViewModels;
-using CakesWebApp.ViewModels.Account;
-
-namespace CakesWebApp.Controllers
+﻿namespace CakesWebApp.Controllers
 {
     using System;
     using System.Linq;
 
+    using InputModels.Account;
     using Services;
     using Services.Contracts;
     using SIS.HTTP.Common;
     using SIS.HTTP.Cookies;
     using SIS.HTTP.Responses.Contracts;
     using SIS.MvcFramework.Attributes;
+    using ViewModels.Account;
+    using ViewModels.Shopping;
 
     public class AccountController : BaseController
     {
@@ -35,18 +35,8 @@ namespace CakesWebApp.Controllers
         public IHttpResponse DoRegister(RegisterViewModel model)
         {
             SetDefaultViewData();
-            //var name = model.Name;
-            //var userName = model.Username;
-            //var password = model.Password;
-            //var confirmPassword = model.ConfirmPassword;
             string errorMessage;
             
-            //1.Validate!
-            //2.Generate password hash.
-            //3.Create user.
-            //4.Redirect to home page.
-
-            //1.
             if (string.IsNullOrWhiteSpace(model.Username) || model.Username.Length < 4)
             {
                 errorMessage = "Please, provide valid username with length 4 or more symbols";
@@ -71,11 +61,9 @@ namespace CakesWebApp.Controllers
                 return BadRequestError(errorMessage);
             }
 
-            //2.
             var hashedPassword = HashService.Hash(model.Password);
             model.Password = hashedPassword;
 
-            //3.
             try
             {
                 _userService.Create(model);
@@ -86,8 +74,8 @@ namespace CakesWebApp.Controllers
                 return ServerError(e.Message);
             }
             
-            //4.
             ViewData["title"] = "Home";
+
             return View("home/index");
         }
 
@@ -110,18 +98,6 @@ namespace CakesWebApp.Controllers
         [HttpPost("/login")]
         public IHttpResponse DoLogin(LoginViewModel model)
         {
-            //string username = null;
-            //string password = null;
-            //if (Request.FormData.ContainsKey("username"))
-            //{
-            //    username = Request.FormData["username"].ToString().Trim();
-            //}
-
-            //if (Request.FormData.ContainsKey("password"))
-            //{
-            //    password = Request.FormData["password"].ToString();
-            //}
-            
             if (string.IsNullOrWhiteSpace(model.Username) || string.IsNullOrWhiteSpace(model.Password)
                                                     || string.IsNullOrEmpty(model.Username) || string.IsNullOrEmpty(model.Password))
             {
@@ -134,6 +110,7 @@ namespace CakesWebApp.Controllers
             using (Db)
             {
                 var user = Db.Users.FirstOrDefault(u => u.Username.Equals(model.Username));
+
                 bool isEqual = user != null && user.Username.Equals(model.Username);
 
                 if (!Db.Users.Any(u => u.Password.Equals(hashedPassword)) || !isEqual)
@@ -151,6 +128,7 @@ namespace CakesWebApp.Controllers
             Request.Session.AddParameter(ShoppingCartViewModel.SessionKey, new ShoppingCartViewModel());
 
             ViewData["authenticated"] = "bloc";
+            ViewData["cart"] = "bloc";
             ViewData["notAuthenticated"] = "none";
             ViewData["title"] = "Home";
             ViewData["searchTerm"] = null;
@@ -212,8 +190,8 @@ namespace CakesWebApp.Controllers
                     {
                         Name = u.Name,
                         Username = u.Username,
-                        RegistrationDate = u.DateOfRegistration.ToString("dd-MM-yyyy"),
-                        TotalOrders = u.Orders.Count.ToString()
+                        RegistrationDate = u.DateOfRegistration,
+                        TotalOrders = Db.Orders.Count(o => o.UserId == u.Id)
                     })
                     .First();
 
@@ -222,13 +200,10 @@ namespace CakesWebApp.Controllers
                     return View("home/index");
                 }
 
-                //var ordersCount = Db.Orders
-                //    .Count(o => o.UserId == user.Id);
                 string content = $"<p>Name: {model.Name}</p>" +
                                  $"<p>Username: {model.Username}</p>" +
                                  $"<p>Registered on: {model.RegistrationDate}</p>" +
                                  $"<p>Orders Count: {model.TotalOrders}</p>";
-                ViewData["show"] = "bloc";
                 ViewData["profile"] = content;
                 ViewData["title"] = "My Profile";
 

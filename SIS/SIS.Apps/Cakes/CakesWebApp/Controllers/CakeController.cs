@@ -4,12 +4,13 @@
     using System.Linq;
     using System.Text;
     
+    using InputModels.Product;
     using Services;
     using Services.Contracts;
     using SIS.HTTP.Responses.Contracts;
     using SIS.MvcFramework.Attributes;
-    using ViewModels;
     using ViewModels.Product;
+    using ViewModels.Shopping;
 
     public class CakeController : BaseController
     {
@@ -56,13 +57,13 @@
 
             ViewData["show"] = "display";
             ViewData["name"] = model.Name;
-            ViewData["price"] = model.Price;
+            ViewData["price"] = model.Price.ToString("F2");
 
             return View("products/add");
         }
 
         [HttpGet("/search")]
-        public IHttpResponse Search()
+        public IHttpResponse Search(SearchInputModel model)
         {
             if (!IsAuthenticated())
             {
@@ -73,13 +74,11 @@
 
             const string searchTermKey = "searchTerm";
 
-            var parameters = Request.QueryData;
+            //var parameters = Request.QueryData;
             var shoppingCart = Request.Session.GetParameter<ShoppingCartViewModel>(ShoppingCartViewModel.SessionKey);
 
-            var searchTerm = parameters.ContainsKey(searchTermKey)
-                ? (string)parameters[searchTermKey]
-                : null;
-
+            var searchTerm = model.SearchTerm;
+            
             bool isSearchKey = Request.Url.Contains(searchTermKey);
 
             if (isSearchKey)
@@ -111,9 +110,9 @@
                 var sb = new StringBuilder();
                 sb.AppendLine(@"<div class=""row""><div class=""col-sm-3""></div><table class=""table table-bordered table-striped col-sm-6 ""><tbody><tr><th scope=""col-sm-4"">Name</th><th scope=""col-sm-1"">Price</th><th scope=""col-sm-1"">Order</th></tr>");
 
-                foreach (var model in allProducts)
+                foreach (var productViewModel in allProducts)
                 {
-                    sb.AppendLine($@"<tr ><td><a  class=""btn btn-outline-primary col-sm-12"" href=""/details?id={model.Id}"">{model.Name}</a></td><td><p>${model.Price}</p></td><td><form method=""get"" action=""shopping/add"" class=""col-sm-1""><button type=""submit"" name=""id"" class=""btn btn-outline-primary"" value=""{model.Id}"">Order</button></form></td></tr>");
+                    sb.AppendLine($@"<tr ><td><a  class=""btn btn-outline-primary col-sm-12"" href=""/details?id={productViewModel.Id}"">{productViewModel.Name}</a></td><td><p>${productViewModel.Price}</p></td><td><form method=""get"" action=""shopping/add"" class=""col-sm-1""><button type=""submit"" name=""id"" class=""btn btn-outline-primary"" value=""{productViewModel.Id}""><i class=""fas fa-cart-plus""></i> Add to Cart</button></form></td></tr>");
                 }
 
                 sb.AppendLine(@"</tbody></table><div class=""col-sm-3""></div></div>");

@@ -2,7 +2,6 @@
 {
     using Data;
     using SIS.MvcFramework;
-    using SIS.MvcFramework.Services.Contracts;
 
     public abstract class BaseController : Controller
     {

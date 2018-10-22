@@ -1,10 +1,10 @@
-﻿namespace CakesWebApp.ViewModels.Product
+﻿namespace CakesWebApp.InputModels.Product
 {
     public class AddProductViewModel
     {
         public string Name { get; set; }
 
-        public string Price { get; set; }
+        public decimal Price { get; set; }
 
         public string ImageUrl { get; set; }
     }

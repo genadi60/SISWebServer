@@ -1,14 +1,15 @@
-﻿using CakesWebApp.ViewModels.Product;
-
-namespace CakesWebApp.Services.Contracts
+﻿namespace CakesWebApp.Services.Contracts
 {
     using System.Collections.Generic;
+
+    using InputModels.Product;
+    using ViewModels.Product;
 
     public interface IProductService
     {
         void Create(AddProductViewModel model);
 
-        ICollection<ProductListingViewModel> All(string searchTerm = null);
+        ICollection<ProductViewModel> All(string searchTerm = null);
 
         ICollection<ProductShowViewModel> ShowAll();
 
@@ -16,6 +17,6 @@ namespace CakesWebApp.Services.Contracts
 
         bool Exists(int id);
 
-        ICollection<ProductInCartViewModel> FindProductsInCart(IEnumerable<int> ids);
+        ICollection<ProductViewModel> FindProductsInCart(IEnumerable<int> ids);
     }
 }

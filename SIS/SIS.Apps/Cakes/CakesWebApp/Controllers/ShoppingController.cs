@@ -1,16 +1,15 @@
-﻿using CakesWebApp.ViewModels;
-using CakesWebApp.ViewModels.Product;
-
-namespace CakesWebApp.Controllers
+﻿namespace CakesWebApp.Controllers
 {
     using System.Linq;
     using System.Text;
 
+    using InputModels.Shopping;
     using Services;
     using Services.Contracts;
     using SIS.HTTP.Responses.Contracts;
     using SIS.MvcFramework.Attributes;
-    using SIS.MvcFramework.Services.Contracts;
+    using ViewModels.Product;
+    using ViewModels.Shopping;
 
     public class ShoppingController : BaseController
     {
@@ -26,7 +25,7 @@ namespace CakesWebApp.Controllers
         }
 
         [HttpGet("/shopping/add")]
-        public IHttpResponse AddToCart(ProductInCartViewModel model)
+        public IHttpResponse AddToCart(ProductViewModel model)
         {
             if (!IsAuthenticated())
             {
@@ -37,14 +36,6 @@ namespace CakesWebApp.Controllers
 
             var cakeId = Request.QueryData["id"].ToString().Trim();
             var id = int.Parse(cakeId);
-
-            var userName = User;
-
-            if (userName == null)
-            {
-                ViewData["title"] = "Login";
-                return View("account/login");
-            }
 
             var productExists = _product.Exists(id);
 
@@ -63,7 +54,7 @@ namespace CakesWebApp.Controllers
         }
 
         [HttpGet("/shopping/cart")]
-        public IHttpResponse ShowCart()
+        public IHttpResponse ShowCart(ClearProductInputModel model)
         {
             if (!IsAuthenticated())
             {
@@ -71,6 +62,8 @@ namespace CakesWebApp.Controllers
                 ViewData["title"] = "Login";
                 return View("account/login");
             }
+
+            ViewData["cart"] = "none";
 
             var shoppingCart = Request.Session.GetParameter<ShoppingCartViewModel>(ShoppingCartViewModel.SessionKey);
 
@@ -83,15 +76,15 @@ namespace CakesWebApp.Controllers
             }
             else
             {
-                if (Request.QueryData.ContainsKey("clear"))
+                if (model.ClearProduct != 0)
                 {
-                    var clearedProductId = int.Parse(Request.QueryData["clear"].ToString());
+                    var clearedProductId = model.ClearProduct;
 
                     var indexToClear = shoppingCart.ProductIds.IndexOf(clearedProductId);
 
                     shoppingCart.ProductIds.RemoveAt(indexToClear);
 
-                    Request.QueryData.Remove("clear");
+                    Request.QueryData.Remove("clearProduct");
 
                     return Redirect("cart");
                 }
@@ -110,15 +103,15 @@ namespace CakesWebApp.Controllers
                     <th scope=""col"">Price</th>
                     <th scope=""col"">Clear</th>
                     </tr>");
-                foreach (var model in productsInCart)
+                foreach (var productViewModel in productsInCart)
                 {
-                    sb.Append($@"<tr><td>{model.Name}</td><td>${model.Price:F2}</td><td><a class=""btn"" href=""cart?clear={model.Id}"">Clear</a></td></tr>");
+                    sb.Append($@"<tr><td>{productViewModel.Name}</td><td>${productViewModel.Price:F2}</td><td><a class=""btn btn-outline-primary"" href=""cart?clearProduct={productViewModel.Id}""><i class=""far fa-thumbs-down""></i> Clear</a></td></tr>");
                 }
 
                 sb.Append(@"</tbody></table><div class=""col-sm-3""></div></div>");
                
                 var totalPrice = productsInCart
-                    .Sum(pr => decimal.Parse(pr.Price));
+                    .Sum(pr => pr.Price);
 
                 ViewData["showItems"] = "bloc";
                 ViewData["cartItems"] = sb.ToString().Trim();
@@ -183,6 +176,12 @@ namespace CakesWebApp.Controllers
 
                 var orders = Db.Orders
                     .Where(o => o.User.Username.Equals(username))
+                    .Select(o => new OrderViewModel
+                    {
+                        Id = o.Id,
+                        DateOfCreation = o.DateOfCreation,
+                        Products = o.Products
+                    })
                     .ToList();
 
                 var result = new StringBuilder();
@@ -203,7 +202,7 @@ namespace CakesWebApp.Controllers
         }
 
         [HttpGet("/list")]
-        public IHttpResponse Details()
+        public IHttpResponse Details(OrderInputModel model)
         {
             if (!IsAuthenticated())
             {
@@ -211,14 +210,12 @@ namespace CakesWebApp.Controllers
                 ViewData["title"] = "Login";
                 return View("account/login");
             }
-
-            var orderParameter = Request.QueryData["id"].ToString().Trim();
-            var orderId = int.Parse(orderParameter);
+            
             var username = User;
 
             using (Db)
             {
-                var order = Db.Orders.FirstOrDefault(o => o.Id == orderId && o.User.Username.Equals(username));
+                var order = Db.Orders.FirstOrDefault(o => o.Id == model.Id && o.User.Username.Equals(username));
 
                 if (order == null)
                 {
@@ -226,25 +223,25 @@ namespace CakesWebApp.Controllers
                 }
 
                 var products = order.Products
-                    .Select(o => new ProductListingViewModel()
+                    .Select(o => new ProductViewModel()
                     {
-                        Id = o.ProductId.ToString(),
+                        Id = o.ProductId,
                         Name = o.Product.Name,
-                        Price = o.Product.Price.ToString()
+                        Price = o.Product.Price
                     })
                     .ToList();
 
                 var result = new StringBuilder();
 
-                foreach (var model in products)
+                foreach (var productViewModel in products)
                 {
-                    result.AppendLine($@"<tr><td><a class=""btn"" href=""/details?id={model.Id}"">{model.Name}</a></td><td>${model.Price}</td></tr>");
+                    result.AppendLine($@"<tr><td><a class=""btn"" href=""/details?id={productViewModel.Id}"">{productViewModel.Name}</a></td><td>${productViewModel.Price}</td></tr>");
                 }
 
                 ViewData["products"] = result.ToString().Trim();
-                ViewData["orderId"] = orderParameter;
+                ViewData["orderId"] = model.Id.ToString();
                 ViewData["orderDate"] = order.DateOfCreation.ToString("dd-MM-yyyy");
-                ViewData["title"] = $"Order {orderId} Details";
+                ViewData["title"] = $"Order {model.Id} Details";
 
                 return View("shopping/details");
             }

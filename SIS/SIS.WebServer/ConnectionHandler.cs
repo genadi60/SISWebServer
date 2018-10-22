@@ -74,10 +74,6 @@
                 return null;
             }
 
-            Console.WriteLine("-----REQUEST-----");
-            Console.WriteLine(requestString);
-            Console.WriteLine();
-
             return new HttpRequest(requestString);
         }
 
@@ -101,10 +97,6 @@
                 var byteSegments = new ArraySegment<byte>(responseBytes);
 
                 await _client.SendAsync(byteSegments, SocketFlags.None);
-
-                Console.WriteLine("----RESPONSE----");
-                Console.WriteLine(Encoding.UTF8.GetString(responseBytes));
-                Console.WriteLine();
             }
             _client.Shutdown(SocketShutdown.Both);
         }

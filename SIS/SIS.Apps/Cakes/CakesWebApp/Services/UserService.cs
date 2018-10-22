@@ -1,4 +1,6 @@
-﻿using CakesWebApp.ViewModels.Account;
+﻿using CakesWebApp.InputModels;
+using CakesWebApp.InputModels.Account;
+using CakesWebApp.ViewModels.Account;
 
 namespace CakesWebApp.Services
 {
@@ -52,8 +54,8 @@ namespace CakesWebApp.Services
                     .Select(u => new ProfileViewModel
                     {
                         Username = u.Username,
-                        RegistrationDate = u.DateOfRegistration.ToString("dd-MM-yyyy"),
-                        TotalOrders = u.Orders.Count().ToString()
+                        RegistrationDate = u.DateOfRegistration,
+                        TotalOrders = u.Orders.Count()
                     })
                     .FirstOrDefault();
             }

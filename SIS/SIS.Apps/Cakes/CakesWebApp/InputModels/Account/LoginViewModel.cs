@@ -1,4 +1,4 @@
-﻿namespace CakesWebApp.ViewModels.Account
+﻿namespace CakesWebApp.InputModels.Account
 {
     public class LoginViewModel
     {

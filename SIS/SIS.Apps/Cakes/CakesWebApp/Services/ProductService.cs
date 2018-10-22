@@ -2,13 +2,13 @@
 {
     using System.Collections.Generic;
     using System.Linq;
-    using System.Net;
 
     using Contracts;
     using Data;
+    using InputModels.Product;
     using Models;
     using ViewModels.Product;
-
+    
     public class ProductService : IProductService
     {
         public void Create(AddProductViewModel model)
@@ -18,8 +18,8 @@
                 var product = new Product
                 {
                     Name = model.Name,
-                    Price = decimal.Parse(model.Price),
-                    ImageUrl = WebUtility.HtmlDecode(model.ImageUrl)
+                    Price = model.Price,
+                    ImageUrl = model.ImageUrl
                 };
 
                 db.Add(product);
@@ -27,7 +27,7 @@
             }
         }
         
-        public ICollection<ProductListingViewModel> All(string searchTerm = null)
+        public ICollection<ProductViewModel> All(string searchTerm = null)
         {
             using (var db = new CakesDbContext())
             {
@@ -40,11 +40,11 @@
                 }
 
                 return resultsQuery
-                    .Select(pr => new ProductListingViewModel
+                    .Select(pr => new ProductViewModel
                     {
-                        Id = pr.Id.ToString(),
+                        Id = pr.Id,
                         Name = pr.Name,
-                        Price = pr.Price.ToString()
+                        Price = pr.Price
                     })
                     .ToList();
             }
@@ -60,7 +60,7 @@
                     .Select(pr => new ProductDetailsViewModel
                     {
                         Name = pr.Name,
-                        Price = pr.Price.ToString(),
+                        Price = pr.Price,
                         ImageUrl = pr.ImageUrl
                     })
                     .FirstOrDefault();
@@ -75,22 +75,22 @@
             }
         }
 
-        public ICollection<ProductInCartViewModel> FindProductsInCart(IEnumerable<int> ids)
+        public ICollection<ProductViewModel> FindProductsInCart(IEnumerable<int> ids)
         {
             using (var db = new CakesDbContext())
             {
                 var products = db.Products.ToList();
-                var productsInCart = new List<ProductInCartViewModel>();
+                var productsInCart = new List<ProductViewModel>();
 
                 foreach (var id in ids)
                 {
                     var productViewInCart = products
                         .Where(p => p.Id == id)
-                        .Select(p => new ProductInCartViewModel
+                        .Select(p => new ProductViewModel
                         {
-                            Id = p.Id.ToString(),
+                            Id = p.Id,
                             Name = p.Name,
-                            Price = p.Price.ToString()
+                            Price = p.Price
                         })
                         .FirstOrDefault();
 
@@ -109,7 +109,7 @@
                 return db.Products
                     .Select(pr => new ProductShowViewModel
                     {
-                        Id = pr.Id.ToString(),
+                        Id = pr.Id,
                         Name = pr.Name,
                         ImageUrl = pr.ImageUrl
                     })

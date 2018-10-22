@@ -1,4 +1,6 @@
-﻿using CakesWebApp.ViewModels.Account;
+﻿using CakesWebApp.InputModels;
+using CakesWebApp.InputModels.Account;
+using CakesWebApp.ViewModels.Account;
 
 namespace CakesWebApp.Services.Contracts
 {

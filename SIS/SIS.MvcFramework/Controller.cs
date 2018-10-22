@@ -1,9 +1,4 @@
-﻿using SIS.HTTP.Responses;
-using SIS.HTTP.Sessions;
-using SIS.HTTP.Sessions.Contracts;
-using SIS.MvcFramework.Logger.Contracts;
-
-namespace SIS.MvcFramework
+﻿namespace SIS.MvcFramework
 {
     using System.Collections.Generic;
     using System.Linq;
@@ -12,26 +7,26 @@ namespace SIS.MvcFramework
     using HTTP.Enums;
     using HTTP.Headers;
     using HTTP.Requests.Contracts;
+    using HTTP.Responses;
     using HTTP.Responses.Contracts;
-    using Services;
+    using HTTP.Sessions;
     using Services.Contracts;
     using System.Text;
 
     public abstract class Controller
     {
         private const string ContentPlaceholder = "{{{content}}}";
-        private IHttpSession _session;
 
         protected Controller()
         {
             Response = new HttpResponse {StatusCode = HttpResponseStatusCode.OK};
-            _session = HttpSessionStorage.GetSession("viewData");
-            if (!_session.ContainsParameter("viewData"))
+            var session = HttpSessionStorage.GetSession("viewData");
+            if (!session.ContainsParameter("viewData"))
             {
-                _session.AddParameter("viewData", new Dictionary<string, string>());
+                session.AddParameter("viewData", new Dictionary<string, string>());
                
             }
-            ViewData = (Dictionary<string, string>)_session.GetParameter("viewData");
+            ViewData = (Dictionary<string, string>)session.GetParameter("viewData");
         }
 
         public IUserCookieService UserCookieService { get; internal set; }
@@ -170,7 +165,7 @@ namespace SIS.MvcFramework
             ViewData["authenticated"] = "bloc";
             ViewData["notAuthenticated"] = "none";
             ViewData["visible"] = "bloc";
-            ViewData["greeting"] = User;
+            ViewData["cart"] = "bloc";
             if (!ViewData.ContainsKey("searchTerm"))
             {
                 ViewData["searchTerm"] = null;

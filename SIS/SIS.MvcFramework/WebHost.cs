@@ -1,13 +1,16 @@
-﻿using System.Collections.Generic;
-
-namespace SIS.MvcFramework
+﻿namespace SIS.MvcFramework
 {
     using System;
+    using System.Collections.Generic;
+    using System.Globalization;
     using System.Linq;
     using System.Reflection;
+    using System.Threading;
+
     
     using Attributes;
     using Contracts;
+    using Extensions;
     using HTTP.Enums;
     using HTTP.Requests.Contracts;
     using HTTP.Responses.Contracts;
@@ -21,6 +24,8 @@ namespace SIS.MvcFramework
     {
         public static void Start(IMvcApplication application)
         {
+            Thread.CurrentThread.CurrentCulture = CultureInfo.InvariantCulture;
+
             IServiceCollection serviceCollection = new ServiceCollection();
             application.ConfigureServices(serviceCollection);
 
@@ -54,14 +59,8 @@ namespace SIS.MvcFramework
                     }
 
                     routingTable.Add(httpAttribute.Method, httpAttribute.Path, (request => ExecuteAction(controller, method, request, serviceCollection)));
-                    
-                    Console.WriteLine($"{controller.FullName} => {method.Name} => {httpAttribute.Method} => {httpAttribute.Path}");
                 }
-
-                Console.WriteLine();
-                
             }
-            
         }
 
         private static IHttpResponse ExecuteAction(Type controllerType, MethodBase methodInfo, IHttpRequest request, IServiceCollection serviceCollection )
@@ -77,6 +76,17 @@ namespace SIS.MvcFramework
             controllerInstance.HashService = serviceCollection.CreateInstance<IHashService>();
 
             var methodParameters = methodInfo.GetParameters();
+            
+            var parameters = GetMethodParameters(request, serviceCollection, methodParameters).ToArray();
+
+            var httpResponse = methodInfo.Invoke(controllerInstance, parameters) as IHttpResponse;
+
+
+            return httpResponse;
+        }
+
+        private static List<object> GetMethodParameters(IHttpRequest request, IServiceCollection serviceCollection, ParameterInfo[] methodParameters)
+        {
             var methodParametersObjects = new List<object>();
 
             foreach (var methodParameter in methodParameters)
@@ -88,31 +98,57 @@ namespace SIS.MvcFramework
                 foreach (var propertyInfo in properties)
                 {
                     var key = propertyInfo.Name.ToLower();
-                    object value = null;
+                    string stringValue = null;
                     if (request.FormData.Any(k => k.Key.ToLower() == key))
                     {
-                        value = request.FormData.First(k => k.Key.ToLower() == key).Value;
-                       
+                        stringValue = request.FormData.First(k => k.Key.ToLower() == key).Value.ToString().Trim().UrlDecode();
+
                     }
 
                     else if (request.QueryData.Any(k => k.Key.ToLower() == key))
                     {
-                        value = request.QueryData.First(k => k.Key.ToLower() == key).Value;
+                        stringValue = request.QueryData.First(k => k.Key.ToLower() == key).Value.ToString().Trim().UrlDecode();
                     }
 
-                    if (value != null)
-                    {
-                        propertyInfo.SetMethod.Invoke(methodParameterObject, new object[]{value.ToString().Trim()});
-                    }
+                    ParseProperties(methodParameterObject, propertyInfo, stringValue);
                 }
 
                 methodParametersObjects.Add(methodParameterObject);
             }
 
-            var httpResponse = methodInfo.Invoke(controllerInstance, methodParametersObjects.ToArray()) as IHttpResponse;
+            return methodParametersObjects;
+        }
 
-            
-            return httpResponse;
+        private static void ParseProperties(object methodParameterObject, PropertyInfo propertyInfo, string stringValue)
+        {
+            var typeCode = Type.GetTypeCode(propertyInfo.PropertyType);
+            object value = stringValue;
+            switch (typeCode)
+            {
+                case TypeCode.Char:
+                    if (char.TryParse(stringValue, out var charValue)) value = charValue;
+                    break;
+                case TypeCode.Int32:
+                    if (int.TryParse(stringValue, out var intValue)) value = intValue;
+                    break;
+                case TypeCode.Int64:
+                    if (long.TryParse(stringValue, out var longValue)) value = longValue;
+                    break;
+                case TypeCode.Double:
+                    if (double.TryParse(stringValue, out var doubleValue)) value = doubleValue;
+                    break;
+                case TypeCode.Decimal:
+                    if (decimal.TryParse(stringValue, out var decimalValue)) value = decimalValue;
+                    break;
+                case TypeCode.DateTime:
+                    if (DateTime.TryParse(stringValue, out var dateTimeValue)) value = dateTimeValue;
+                    break;
+            }
+
+            if (value != null)
+            {
+                propertyInfo.SetMethod.Invoke(methodParameterObject, new[] { value });
+            }
         }
     }
 }

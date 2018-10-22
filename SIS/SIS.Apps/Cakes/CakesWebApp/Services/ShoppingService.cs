@@ -21,6 +21,7 @@
                     Products = productIds
                         .Select(id => new OrderProduct
                         {
+                            
                             ProductId = id
                         })
                         .ToList()

@@ -1,18 +1,11 @@
-﻿using CakesWebApp.ViewModels;
-using SIS.MvcFramework.Services.Contracts;
-
-namespace CakesWebApp.Controllers
+﻿namespace CakesWebApp.Controllers
 {
     using SIS.HTTP.Responses.Contracts;
     using SIS.MvcFramework.Attributes;
+    using ViewModels.Shopping;
 
     public class HomeController : BaseController
     {
-        public HomeController()
-        {
-            
-        }
-
         [HttpGet("/")]
         public IHttpResponse Index()
         {
@@ -22,7 +15,6 @@ namespace CakesWebApp.Controllers
             {
                 ViewData["authenticated"] = "bloc";
                 ViewData["notAuthenticated"] = "none";
-                ViewData["greeting"] = User;
                 ViewData["searchTerm"] = null;
                 Request.Session.AddParameter(ShoppingCartViewModel.SessionKey, new ShoppingCartViewModel());
 
@@ -52,17 +44,6 @@ namespace CakesWebApp.Controllers
                 ViewData["visible"] = "bloc";
                 ViewData["title"] = "Login";
                 return View("account/login");
-            }
-
-            var userName = User;
-            if (userName == null)
-            {
-                ViewData["show"] = "none";
-            }
-            else
-            {
-                ViewData["show"] = "display";
-                ViewData["greeting"] = userName;
             }
 
             return View("account/hello");
