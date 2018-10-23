@@ -1,6 +1,5 @@
 ﻿namespace SIS.HTTP.Responses
 {
-    using System;
     using System.Linq;
     using System.Text;
 
@@ -15,24 +14,28 @@
 
     public class HttpResponse : IHttpResponse
     {
-        private readonly string _statusCodeLine;
+        private string _statusCodeLine => new HttpResponseStatusExtensions().GetResponseLine(StatusCode);
 
-        public HttpResponse() { }
-
-        public HttpResponse(HttpResponseStatusCode statusCode)
+        public HttpResponse()
         {
             Headers = new HttpHeaderCollection();
             Cookies = new HttpCookieCollection();
             Content = new byte[0];
-            StatusCode = statusCode;
-            _statusCodeLine = new HttpResponseStatusExtensions().GetResponseLine(StatusCode);
         }
 
-        public HttpResponseStatusCode StatusCode { get; set; }
-        public IHttpHeaderCollection Headers { get; }
+        public HttpResponse(HttpResponseStatusCode statusCode) : this()
+        {
+            StatusCode = statusCode;
+        }
 
-        public IHttpCookieCollection Cookies { get; private set; }
+        public HttpResponseStatusCode StatusCode { get; set; } = HttpResponseStatusCode.OK;
+
+        public IHttpHeaderCollection Headers { get; set; }
+
+        public IHttpCookieCollection Cookies { get; set; }
+
         public byte[] Content { get; set; }
+
         public void AddHeader(HttpHeader header)
         {
             Headers.Add(header);
@@ -57,28 +60,28 @@
 
         public override string ToString()
         {
-            bool isContent = Content.Length > 0;
+            bool existsContent = Content.Length > 0;
 
             var sb = new StringBuilder();
 
             sb.Append(
-                    $"{GlobalConstants.HttpOneProtocolFragment} {_statusCodeLine}{Environment.NewLine}")
+                    $"{GlobalConstants.HttpOneProtocolFragment} {_statusCodeLine}{GlobalConstants.HttpNewLine}")
                 .Append(Headers.ToString());
 
             if (Cookies.HasCookies())
             {
                 foreach (var httpCookie in Cookies)
                 {
-                    sb.Append($"{GlobalConstants.SetCookie}{httpCookie}{Environment.NewLine}");
+                    sb.Append($"{GlobalConstants.SetCookie}{httpCookie}{GlobalConstants.HttpNewLine}");
                 }
                 
             }
 
-            if (isContent)
+            if (existsContent)
             {
-                sb.Append($"{GlobalConstants.ContentLength}{Content.Length}{Environment.NewLine}");
+                sb.Append($"{GlobalConstants.ContentLength}{Content.Length}{GlobalConstants.HttpNewLine}");
             }
-            sb.Append($"{Environment.NewLine}{Environment.NewLine}");
+            sb.Append($"{GlobalConstants.HttpNewLine}{GlobalConstants.HttpNewLine}");
             
 
             var response = sb.ToString();

@@ -7,29 +7,30 @@
 
     using HTTP.Common;
     using HTTP.Cookies;
+    using HTTP.Enums;
     using HTTP.Requests;
     using HTTP.Requests.Contracts;
+    using HTTP.Responses;
     using HTTP.Responses.Contracts;
     using HTTP.Sessions;
-    using Results;
     using Routing;
     
     public class ConnectionHandler
     {
         private readonly Socket _client;
 
-        private readonly ServerRoutingTable _routingTable;
-        
-        public ConnectionHandler(Socket client, ServerRoutingTable routingTable)
+        private readonly ServerRoutingTable _serverRoutingTable;
+
+        public ConnectionHandler(Socket client, ServerRoutingTable serverRoutingTable)
         {
             _client = client;
-            _routingTable = routingTable;
+            _serverRoutingTable = serverRoutingTable;
         }
 
         public async Task ProcessRequestAsync()
         {
             var httpRequest = await ReadRequest();
-            
+
             if (httpRequest != null)
             {
                 string sessionId = SetRequestSession(httpRequest);
@@ -60,7 +61,7 @@
 
                 var requestText = Encoding.UTF8.GetString(buffer.Array, 0, readLength);
                 sb.Append(requestText);
-                
+
                 if (readLength < 1023)
                 {
                     break;
@@ -73,22 +74,18 @@
                 return null;
             }
 
-            Console.WriteLine("-----REQUEST-----");
-            Console.WriteLine(requestString);
-            Console.WriteLine();
-
             return new HttpRequest(requestString);
         }
 
         private IHttpResponse HandleRequest(IHttpRequest httpRequest)
         {
-            if (!_routingTable.Routes.ContainsKey(httpRequest.RequestMethod) 
-                || !_routingTable.Routes[httpRequest.RequestMethod].ContainsKey(httpRequest.Path))
+            if (!_serverRoutingTable.Routes.ContainsKey(httpRequest.RequestMethod)
+                || !_serverRoutingTable.Routes[httpRequest.RequestMethod].ContainsKey(httpRequest.Path))
             {
-                return new NotFound().PageNotFound();
+                return new HttpResponse(HttpResponseStatusCode.Not_Found);
             }
-            var response = _routingTable.Routes[httpRequest.RequestMethod][httpRequest.Path].Invoke(httpRequest);
-            
+            var response = _serverRoutingTable.Routes[httpRequest.RequestMethod][httpRequest.Path].Invoke(httpRequest);
+
             return response;
         }
 
@@ -96,15 +93,10 @@
         {
             if (httpResponse != null)
             {
-                //var responseText = httpResponse.ToString();
                 var responseBytes = httpResponse.GetBytes();
                 var byteSegments = new ArraySegment<byte>(responseBytes);
-                
-                await _client.SendAsync(byteSegments, SocketFlags.None);
 
-                Console.WriteLine("----RESPONSE----");
-                Console.WriteLine(Encoding.UTF8.GetString(responseBytes));
-                Console.WriteLine();
+                await _client.SendAsync(byteSegments, SocketFlags.None);
             }
             _client.Shutdown(SocketShutdown.Both);
         }
@@ -132,11 +124,11 @@
         {
             if (sessionId != null)
             {
-                if (!httpResponse.Cookies.ContainsCookie(GlobalConstants.SessionCookieKey) 
+                if (!httpResponse.Cookies.ContainsCookie(GlobalConstants.SessionCookieKey)
                     && !httpRequest.Cookies.ContainsCookie(GlobalConstants.SessionCookieKey))
                 {
                     httpResponse.Cookies
-                        .Add(new HttpCookie(GlobalConstants.SessionCookieKey, 
+                        .Add(new HttpCookie(GlobalConstants.SessionCookieKey,
                             $"{sessionId}; {GlobalConstants.HttpOnly}"));
                 }
             }

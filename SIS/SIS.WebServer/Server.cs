@@ -1,4 +1,7 @@
-﻿namespace SIS.WebServer
+﻿using System.Globalization;
+using System.Threading;
+
+namespace SIS.WebServer
 {
     using System;
     using System.Net;
@@ -41,6 +44,7 @@
 
         private async Task ListenLoop(Socket client)
         {
+            Thread.CurrentThread.CurrentCulture = CultureInfo.InvariantCulture;
             var connectionHandler = new ConnectionHandler(client, _serverRoutingTable);
             await connectionHandler.ProcessRequestAsync();
         }

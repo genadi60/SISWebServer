@@ -9,9 +9,10 @@
 
     public class TextResult : HttpResponse
     {
-        public TextResult(string content, HttpResponseStatusCode responseStatusCode) : base(responseStatusCode)
+        public TextResult(string content, HttpResponseStatusCode responseStatusCode) 
+            : base(responseStatusCode)
         {
-            Headers.Add(new HttpHeader(GlobalConstants.ContentType, "text/plain"));
+            Headers.Add(new HttpHeader(GlobalConstants.ContentType, "text/plain; charset=utf-8"));
             Content = Encoding.UTF8.GetBytes(content);
         }
     }

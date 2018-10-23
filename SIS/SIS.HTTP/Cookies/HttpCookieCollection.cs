@@ -21,7 +21,7 @@
             {
                 throw new ArgumentNullException();
             }
-            _cookies.Add(cookie.Key, cookie);
+            _cookies[cookie.Key] = cookie;
         }
 
         public void Add(string key, string value)

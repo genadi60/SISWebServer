@@ -10,7 +10,7 @@
     {
         HttpResponseStatusCode StatusCode { get; set; }
 
-        IHttpHeaderCollection Headers { get; }
+        IHttpHeaderCollection Headers { get; set; }
 
         IHttpCookieCollection Cookies { get; }
 

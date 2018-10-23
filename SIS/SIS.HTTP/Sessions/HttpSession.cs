@@ -26,6 +26,11 @@
             return _parameters[name];
         }
 
+        public T GetParameter<T>(string name)
+        {
+            return (T)GetParameter(name);
+        }
+
         public bool ContainsParameter(string name)
         {
             if (string.IsNullOrEmpty(name))
