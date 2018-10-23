@@ -12,14 +12,22 @@ namespace SIS.MvcFramework.Services
     {
         private  IDictionary<Type, Type> serviceContainer;
 
+        private IDictionary<Type, Func<object>> serviceFuncsContainer;
+
         public ServiceCollection()
         {
             serviceContainer = new Dictionary<Type, Type>();
+            serviceFuncsContainer = new Dictionary<Type, Func<object>>();
         }
         
         public void AddService<TSource, TDestination>()
         {
             serviceContainer[typeof(TSource)] = typeof(TDestination);
+        }
+
+        public void AddService<T>(Func<T> p)
+        {
+            serviceFuncsContainer.Add(typeof(T), () => p());
         }
 
         public T CreateInstance<T>()
@@ -29,6 +37,11 @@ namespace SIS.MvcFramework.Services
 
         public object CreateInstance(Type type)
         {
+            if (serviceFuncsContainer.ContainsKey(type))
+            {
+                return serviceFuncsContainer[type]();
+            }
+
             if (serviceContainer.ContainsKey(type))
             {
                 type = serviceContainer[type];

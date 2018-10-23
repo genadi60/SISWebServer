@@ -6,6 +6,8 @@
     {
         void AddService<TSource, TDestination>();
 
+        void AddService<T>(Func<T> p);
+
         T CreateInstance<T>();
 
         object CreateInstance(Type type);

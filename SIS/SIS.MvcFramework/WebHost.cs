@@ -5,8 +5,6 @@
     using System.Globalization;
     using System.Linq;
     using System.Reflection;
-    using System.Threading;
-
     
     using Attributes;
     using Contracts;
@@ -24,7 +22,7 @@
     {
         public static void Start(IMvcApplication application)
         {
-            Thread.CurrentThread.CurrentCulture = CultureInfo.InvariantCulture;
+            CultureInfo.DefaultThreadCurrentCulture = CultureInfo.InvariantCulture;
 
             IServiceCollection serviceCollection = new ServiceCollection();
             application.ConfigureServices(serviceCollection);

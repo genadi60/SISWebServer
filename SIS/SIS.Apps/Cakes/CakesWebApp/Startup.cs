@@ -1,4 +1,6 @@
-﻿namespace CakesWebApp
+﻿using System;
+
+namespace CakesWebApp
 {
     using SIS.MvcFramework.Contracts;
     using SIS.MvcFramework.Logger;
@@ -15,7 +17,7 @@
         {
             collection.AddService<IHashService, HashService>();
             collection.AddService<IUserCookieService, UserCookieService>();
-            collection.AddService<ILogger, FileLogger>();
+            collection.AddService<ILogger>(() => new FileLogger($"log_{DateTime.UtcNow:dd-MM-yyyy}.txt"));
         }
     }
 }

@@ -44,7 +44,6 @@ namespace SIS.WebServer
 
         private async Task ListenLoop(Socket client)
         {
-            Thread.CurrentThread.CurrentCulture = CultureInfo.InvariantCulture;
             var connectionHandler = new ConnectionHandler(client, _serverRoutingTable);
             await connectionHandler.ProcessRequestAsync();
         }
