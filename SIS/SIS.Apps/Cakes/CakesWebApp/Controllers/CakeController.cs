@@ -1,4 +1,6 @@
-﻿namespace CakesWebApp.Controllers
+﻿using System;
+
+namespace CakesWebApp.Controllers
 {
     using System.Globalization;
     using System.Linq;
@@ -38,7 +40,7 @@
         }
 
         [HttpPost("/add")]
-        public IHttpResponse DoAddCake(AddProductViewModel model)
+        public IHttpResponse DoAddCake(AddProductInputModel model)
         {
             if (!IsAuthenticated())
             {
@@ -60,7 +62,7 @@
             ViewData["price"] = model.Price.ToString("F2");
 
             return View("products/add");
-        }
+        }//
 
         [HttpGet("/search")]
         public IHttpResponse Search(SearchInputModel model)

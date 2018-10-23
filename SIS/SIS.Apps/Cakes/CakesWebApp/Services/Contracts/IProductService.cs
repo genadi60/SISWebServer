@@ -7,7 +7,7 @@
 
     public interface IProductService
     {
-        void Create(AddProductViewModel model);
+        void Create(AddProductInputModel model);
 
         ICollection<ProductViewModel> All(string searchTerm = null);
 

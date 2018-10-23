@@ -75,9 +75,7 @@
             controllerInstance.UserCookieService = serviceCollection.CreateInstance<IUserCookieService>();
             controllerInstance.HashService = serviceCollection.CreateInstance<IHashService>();
 
-            var methodParameters = methodInfo.GetParameters();
-            
-            var parameters = GetMethodParameters(request, serviceCollection, methodParameters).ToArray();
+            var parameters = GetMethodParameters(request, serviceCollection, methodInfo).ToArray();
 
             var httpResponse = methodInfo.Invoke(controllerInstance, parameters) as IHttpResponse;
 
@@ -85,44 +83,67 @@
             return httpResponse;
         }
 
-        private static List<object> GetMethodParameters(IHttpRequest request, IServiceCollection serviceCollection, ParameterInfo[] methodParameters)
+        private static List<object> GetMethodParameters(IHttpRequest request, IServiceCollection serviceCollection, MethodBase methodInfo )
         {
+            var methodParameters = methodInfo.GetParameters();
             var methodParametersObjects = new List<object>();
 
             foreach (var methodParameter in methodParameters)
             {
-                var type = methodParameter.ParameterType;
-                var methodParameterObject = serviceCollection.CreateInstance(type);
-                var properties = type.GetProperties();
+                var parameterType = methodParameter.ParameterType;
+                var parameterProperties = parameterType.GetProperties();
 
-                foreach (var propertyInfo in properties)
+                if (parameterType.IsValueType || Type.GetTypeCode(parameterType) == TypeCode.String)
                 {
-                    var key = propertyInfo.Name.ToLower();
-                    string stringValue = null;
-                    if (request.FormData.Any(k => k.Key.ToLower() == key))
-                    {
-                        stringValue = request.FormData.First(k => k.Key.ToLower() == key).Value.ToString().Trim().UrlDecode();
-
-                    }
-
-                    else if (request.QueryData.Any(k => k.Key.ToLower() == key))
-                    {
-                        stringValue = request.QueryData.First(k => k.Key.ToLower() == key).Value.ToString().Trim().UrlDecode();
-                    }
-
-                    ParseProperties(methodParameterObject, propertyInfo, stringValue);
+                    var stringValue = GetRequestData(request, methodParameter.Name);
+                    methodParametersObjects.Add(TryParseProperties(parameterType, stringValue));
                 }
+                else
+                {
+                    var methodParameterObject = serviceCollection.CreateInstance(parameterType);
+                    
+                    foreach (var propertyInfo in parameterProperties)
+                    {
+                        string stringValue = GetRequestData(request, propertyInfo.Name);
 
-                methodParametersObjects.Add(methodParameterObject);
+                        var value = TryParseProperties(propertyInfo.PropertyType, stringValue);
+
+                        if (value != null)
+                        {
+                            propertyInfo.SetMethod.Invoke(methodParameterObject, new[] {value});
+                        }
+                    }
+
+                    methodParametersObjects.Add(methodParameterObject);
+                }
             }
 
             return methodParametersObjects;
         }
 
-        private static void ParseProperties(object methodParameterObject, PropertyInfo propertyInfo, string stringValue)
+        private static string GetRequestData(IHttpRequest request, string key)
         {
-            var typeCode = Type.GetTypeCode(propertyInfo.PropertyType);
-            object value = stringValue;
+            key = key.ToLower();
+            string stringValue = null;
+
+            if (request.FormData.Any(k => k.Key.ToLower() == key))
+            {
+                stringValue = request.FormData.First(k => k.Key.ToLower() == key).Value.ToString().Trim().UrlDecode();
+
+            }
+
+            else if (request.QueryData.Any(k => k.Key.ToLower() == key))
+            {
+                stringValue = request.QueryData.First(k => k.Key.ToLower() == key).Value.ToString().Trim().UrlDecode();
+            }
+
+            return stringValue;
+        }
+
+        private static object TryParseProperties(Type propertyType, string stringValue)
+        {
+            var typeCode = Type.GetTypeCode(propertyType);
+            object value = null;
             switch (typeCode)
             {
                 case TypeCode.Char:
@@ -143,12 +164,12 @@
                 case TypeCode.DateTime:
                     if (DateTime.TryParse(stringValue, out var dateTimeValue)) value = dateTimeValue;
                     break;
+                case TypeCode.String:
+                    value = stringValue;
+                    break;
             }
 
-            if (value != null)
-            {
-                propertyInfo.SetMethod.Invoke(methodParameterObject, new[] { value });
-            }
+            return value;
         }
     }
 }

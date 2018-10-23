@@ -1,6 +1,6 @@
 ﻿namespace CakesWebApp.InputModels.Product
 {
-    public class AddProductViewModel
+    public class AddProductInputModel
     {
         public string Name { get; set; }
 

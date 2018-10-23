@@ -11,7 +11,7 @@
     
     public class ProductService : IProductService
     {
-        public void Create(AddProductViewModel model)
+        public void Create(AddProductInputModel model)
         {
             using (var db = new CakesDbContext())
             {
