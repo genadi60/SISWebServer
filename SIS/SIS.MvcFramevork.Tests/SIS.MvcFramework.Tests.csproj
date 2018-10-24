@@ -18,19 +18,16 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Update="TestViews\IfForAndForeach - Copy.html">
+    <None Update="TestViews\IfForAndForeach.html">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Update="TestViews\IfForAndForeach.Result.html">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Update="TestViews\viewWithNoCode - Copy.html">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
     <None Update="TestViews\viewWithNoCode.Result.html">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Update="TestViews\workWithViewModel - Copy.html">
+    <None Update="TestViews\workWithViewModel.html">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Update="TestViews\workWithViewModel.Result.html">
