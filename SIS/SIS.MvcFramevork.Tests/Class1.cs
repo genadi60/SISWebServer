@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace SIS.MvcFramevork.Tests
+﻿namespace SIS.MvcFramework.Tests
 {
     public class Class1
     {

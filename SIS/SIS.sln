@@ -15,7 +15,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CakesWebApp", "SIS.Apps\Cak
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SIS.MvcFramework", "SIS.MvcFramework\SIS.MvcFramework.csproj", "{D53D3C73-E708-4C7B-AA96-0C7EA5FFC8F2}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SIS.MvcFramevork.Tests", "SIS.MvcFramevork.Tests\SIS.MvcFramevork.Tests.csproj", "{1CEC91DB-1200-4CEB-8AA6-E722A62B4470}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SIS.MvcFramework.Tests", "SIS.MvcFramevork.Tests\SIS.MvcFramework.Tests.csproj", "{1CEC91DB-1200-4CEB-8AA6-E722A62B4470}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
