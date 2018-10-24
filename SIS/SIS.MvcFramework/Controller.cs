@@ -55,20 +55,18 @@
             }
         }
 
-        private string ProcessFileHtml(string fileName)
+        private string ProcessFileHtml(string viewName, string layout = GlobalConstants.Layout)
         {
-            if ("/".Equals(fileName))
+            if ("/".Equals(viewName))
             {
-                fileName = GlobalConstants.HomeIndex + GlobalConstants.Html;
+                viewName = GlobalConstants.HomeIndex;
             }
-            else
-            {
-                fileName = fileName + GlobalConstants.Html;
-            }
+                   
+            viewName = $"{GlobalConstants.View}{viewName}{GlobalConstants.Html}";
+           
+            var layoutHtml = System.IO.File.ReadAllText($"{GlobalConstants.View}{layout}");
 
-            var layoutHtml = System.IO.File.ReadAllText(GlobalConstants.View + GlobalConstants.Layout);
-
-            var fileHtml = System.IO.File.ReadAllText(GlobalConstants.View + fileName);
+            var fileHtml = System.IO.File.ReadAllText(viewName);
 
             var content = layoutHtml.Replace(ContentPlaceholder, fileHtml);
 

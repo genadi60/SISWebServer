@@ -12,6 +12,12 @@ namespace SIS.MvcFramework.Logger
 
         private static object _lockObject = new object();
 
+        public FileLogger()
+            : this($"log_{DateTime.UtcNow:dd-MM-yyyy}.txt")
+        {
+
+        }
+
         public FileLogger(string fileName)
         {
             _filename = fileName;
