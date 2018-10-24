@@ -143,35 +143,41 @@ namespace CakesWebApp.Controllers
                 return View("account/login");
             }
 
-            var cakeId = Request.QueryData["id"].ToString().Trim();
-            var id = int.Parse(cakeId);
+            //var cakeId = Request.QueryData["id"].ToString().Trim();
+            //var id = int.Parse(cakeId);
 
 
-            if (string.IsNullOrWhiteSpace(cakeId))
+            if (model.Id == 0)
 
             {
                 var message = "Invalid request.";
                 return BadRequestError(message);
             }
 
-            var cake = Db.Products
-                .FirstOrDefault(c => c.Id == id);
-
-            if (cake == null)
+            using (Db)
             {
-                ViewData["title"] = "Home";
-                return View("home/index");
+                var cake = Db.Products
+                    .Where(c => c.Id == model.Id)
+                    .Select(c => new ProductDetailsViewModel
+                    {
+                        Name = c.Name,
+                        Price = c.Price,
+                        ImageUrl = c.ImageUrl
+                    })
+                    .First();
+
+                if (cake == null)
+                {
+                    ViewData["title"] = "Home";
+                    return View("home/index");
+                }
+
+                ViewData["cakeName"] = cake.Name;
+                ViewData["cakeId"] = model.Id.ToString();
+                ViewData["cakePrice"] = cake.Price.ToString(CultureInfo.InvariantCulture);
+                ViewData["pictureUrl"] = cake.ImageUrl;
+                ViewData["title"] = "Cake Details";
             }
-
-            var name = cake.Name.Trim();
-            var price = cake.Price;
-            var pictureUrl = cake.ImageUrl;
-
-            ViewData["cakeName"] = name;
-            ViewData["cakeId"] = cakeId;
-            ViewData["cakePrice"] = price.ToString(CultureInfo.InvariantCulture);
-            ViewData["pictureUrl"] = pictureUrl;
-            ViewData["title"] = "Cake Details";
 
             return View("products/cakeDetails");
         }

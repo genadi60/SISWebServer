@@ -5,8 +5,6 @@
     using System.Globalization;
     using System.Linq;
     using System.Reflection;
-    using System.Threading;
-
     
     using Attributes;
     using Contracts;
@@ -24,21 +22,21 @@
     {
         public static void Start(IMvcApplication application)
         {
-            Thread.CurrentThread.CurrentCulture = CultureInfo.InvariantCulture;
+            CultureInfo.DefaultThreadCurrentCulture = CultureInfo.InvariantCulture;
 
             IServiceCollection serviceCollection = new ServiceCollection();
             application.ConfigureServices(serviceCollection);
 
             var serverRoutingTable = new ServerRoutingTable();
 
-            AutoRegisterRoutes(serverRoutingTable, application, serviceCollection);
+            AutoRegisterRoutes(application, serverRoutingTable, serviceCollection);
 
             application.Configure();
 
             new Server(80, serverRoutingTable).Run();
         }
 
-        private static void AutoRegisterRoutes(ServerRoutingTable routingTable, IMvcApplication application, IServiceCollection serviceCollection)
+        private static void AutoRegisterRoutes(IMvcApplication application, ServerRoutingTable routingTable, IServiceCollection serviceCollection)
         {
             var controllers = application.GetType().Assembly.GetTypes()
                 .Where(myType => myType.IsClass && !myType.IsAbstract && myType.IsSubclassOf(typeof(Controller)));
@@ -75,7 +73,7 @@
             controllerInstance.UserCookieService = serviceCollection.CreateInstance<IUserCookieService>();
             controllerInstance.HashService = serviceCollection.CreateInstance<IHashService>();
 
-            var parameters = GetMethodParameters(request, serviceCollection, methodInfo).ToArray();
+            var parameters = GetMethodParameters(methodInfo, request, serviceCollection).ToArray();
 
             var httpResponse = methodInfo.Invoke(controllerInstance, parameters) as IHttpResponse;
 
@@ -83,7 +81,7 @@
             return httpResponse;
         }
 
-        private static List<object> GetMethodParameters(IHttpRequest request, IServiceCollection serviceCollection, MethodBase methodInfo )
+        private static List<object> GetMethodParameters(MethodBase methodInfo, IHttpRequest request, IServiceCollection serviceCollection )
         {
             var methodParameters = methodInfo.GetParameters();
             var methodParametersObjects = new List<object>();
