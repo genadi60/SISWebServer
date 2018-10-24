@@ -85,8 +85,7 @@
             if (Request.Cookies.ContainsCookie(".auth_cake"))
             {
                 
-                //ViewData["title"] = "Home";
-                return BadRequestError("You are now logged!");
+               return BadRequestError("You are now logged!");
             }
 
             SetDefaultViewData();

@@ -1,33 +1,31 @@
-﻿using System.Collections;
-using System.Diagnostics;
-using System.Linq;
-
-namespace SIS.MvcFramework.Services
+﻿namespace SIS.MvcFramework.Services
 {
     using System;
     using System.Collections.Generic;
+    using System.Linq;
+
     using Contracts;
 
     public class ServiceCollection : IServiceCollection
     {
-        private  IDictionary<Type, Type> serviceContainer;
+        private readonly IDictionary<Type, Type> _serviceContainer;
 
-        private IDictionary<Type, Func<object>> serviceFuncsContainer;
+        private readonly IDictionary<Type, Func<object>> _serviceFuncsContainer;
 
         public ServiceCollection()
         {
-            serviceContainer = new Dictionary<Type, Type>();
-            serviceFuncsContainer = new Dictionary<Type, Func<object>>();
+            _serviceContainer = new Dictionary<Type, Type>();
+            _serviceFuncsContainer = new Dictionary<Type, Func<object>>();
         }
         
         public void AddService<TSource, TDestination>()
         {
-            serviceContainer[typeof(TSource)] = typeof(TDestination);
+            _serviceContainer[typeof(TSource)] = typeof(TDestination);
         }
 
         public void AddService<T>(Func<T> p)
         {
-            serviceFuncsContainer.Add(typeof(T), () => p());
+            _serviceFuncsContainer.Add(typeof(T), () => p());
         }
 
         public T CreateInstance<T>()
@@ -37,14 +35,14 @@ namespace SIS.MvcFramework.Services
 
         public object CreateInstance(Type type)
         {
-            if (serviceFuncsContainer.ContainsKey(type))
+            if (_serviceFuncsContainer.ContainsKey(type))
             {
-                return serviceFuncsContainer[type]();
+                return _serviceFuncsContainer[type]();
             }
 
-            if (serviceContainer.ContainsKey(type))
+            if (_serviceContainer.ContainsKey(type))
             {
-                type = serviceContainer[type];
+                type = _serviceContainer[type];
             }
 
             if (type.IsAbstract || type.IsInterface)

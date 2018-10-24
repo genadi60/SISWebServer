@@ -1,6 +1,4 @@
-﻿using SIS.MvcFramework.Logger.Contracts;
-
-namespace SIS.MvcFramework.Services
+﻿namespace SIS.MvcFramework.Services
 {
     using System;
     using System.IO;
@@ -8,6 +6,7 @@ namespace SIS.MvcFramework.Services
     using System.Text;
 
     using Contracts;
+    using Logger.Contracts;
 
     public class UserCookieService : IUserCookieService
     {
