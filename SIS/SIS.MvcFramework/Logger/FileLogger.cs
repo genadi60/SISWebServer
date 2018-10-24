@@ -13,15 +13,21 @@ namespace SIS.MvcFramework.Logger
         private static object _lockObject = new object();
 
         public FileLogger()
+            : this($"log_{DateTime.UtcNow:dd-MM-yyyy}.txt")
         {
-            _filename = "logfile.txt";
+
+        }
+
+        public FileLogger(string fileName)
+        {
+            _filename = fileName;
         }
 
         public void Log(string message)
         {
             lock (_lockObject)
             {
-                File.AppendAllText(_filename, $"{DateTime.UtcNow}: {message}{GlobalConstants.HttpNewLine}");
+                File.AppendAllText(_filename, $"[{DateTime.UtcNow:hh:mm:ss tt}]: {message}{GlobalConstants.HttpNewLine}");
             }
         }
     }

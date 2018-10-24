@@ -1,12 +1,11 @@
-﻿using SIS.MvcFramework.Logger.Contracts;
-
-namespace SIS.MvcFramework.Services
+﻿namespace SIS.MvcFramework.Services
 {
     using System;
     using System.Security.Cryptography;
     using System.Text;
 
     using Contracts;
+    using Logger.Contracts;
 
 
     public class HashService : IHashService
