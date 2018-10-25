@@ -18,7 +18,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Update="TestViews\IfForAndForeach.html">
+    <None Update="TestViews\ifForAndForeach.html">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Update="TestViews\IfForAndForeach.Result.html">
