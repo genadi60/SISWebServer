@@ -1,18 +1,17 @@
-﻿using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Reflection;
-using System.Text;
-using System.Text.RegularExpressions;
-using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CSharp;
-using Microsoft.CodeAnalysis.Emit;
-using SIS.MvcFramework.ViewEngine.Contracts;
-
-namespace SIS.MvcFramework.ViewEngine
+﻿namespace SIS.MvcFramework.ViewEngine
 {
+    using System;
+    using System.Collections.Generic;
+    using System.IO;
+    using System.Linq;
+    using System.Reflection;
+    using System.Text;
+    using System.Text.RegularExpressions;
+    using Microsoft.CodeAnalysis;
+    using Microsoft.CodeAnalysis.CSharp;
+
+    using Contracts;
+
     public class ViewEngine : IViewEngine
     {
         public string GetHtml<T>(string viewName, string viewCode, T model)
@@ -50,9 +49,11 @@ namespace MyAppView
 }}";
             var instanceOfViewClass = GetInstance(viewCSharpCode, $"MyAppView.{viewTypeName}", typeof(T)) as IView<T>;
 
-            var html = instanceOfViewClass.GetHtml(model);
-
-            //2.C# => executable object.GetHtml(model)
+            if (instanceOfViewClass == null)
+            {
+                throw new Exception("Model can not be instantiated.");
+            }
+            string html = instanceOfViewClass.GetHtml(model);
 
             return html;
         }
@@ -65,6 +66,7 @@ namespace MyAppView
                 .AddReferences(MetadataReference.CreateFromFile(typeof(IView<>).GetTypeInfo().Assembly.Location))
                 .AddReferences(MetadataReference.CreateFromFile(typeof(IEnumerable<>).GetTypeInfo().Assembly.Location))
                 .AddReferences(MetadataReference.CreateFromFile(typeof(Enumerable).GetTypeInfo().Assembly.Location))
+                .AddReferences(MetadataReference.CreateFromFile(Assembly.Load(new AssemblyName("mscorlib")).Location))
                 .AddReferences(MetadataReference.CreateFromFile(viewModelType.Assembly.Location))
                 .AddSyntaxTrees(CSharpSyntaxTree.ParseText(viewCSharpCode));
 
@@ -84,7 +86,7 @@ namespace MyAppView
                     var failures = result.Diagnostics.Where(diagnostic =>
                         diagnostic.IsWarningAsError ||
                         diagnostic.Severity == DiagnosticSeverity.Error);
-
+                    
                     foreach (var diagnostic in failures)
                     {
 
@@ -110,15 +112,22 @@ namespace MyAppView
             
             foreach (var line in lines)
             {
-                if (line.Trim().StartsWith("{") || line.Trim().StartsWith("}")
-                    || line.Trim().StartsWith("@"))
+                var trimmedLine = line.Trim();
+                var htmlLine = line;
+
+                if (trimmedLine.StartsWith("{") || trimmedLine.StartsWith("}")
+                    || trimmedLine.StartsWith("@"))
                 {
-                    var returnedLine = GetCodeLine(line);
-                    sb.Append(returnedLine).Append(Environment.NewLine);
+                    if (trimmedLine.StartsWith("@"))
+                    {
+                        htmlLine = GetCodeLine(line);
+                    }
+                    
+                    sb.AppendLine(htmlLine);
                 }
                 else
                 {
-                    var htmlLine = line;
+                    htmlLine = htmlLine.Replace("\"", "\\\"");
                     var pattern = @"@(?<value>[^< ]+)";
                     var regex = new Regex(pattern);
                     var matches = regex.Matches(htmlLine).ToArray();
@@ -127,19 +136,15 @@ namespace MyAppView
                         for (int i = 0; i < matches.Length; i++)
                         {
                             var stringToReplace = matches[i].Groups[0].ToString();
-                            var newString = matches[i].Groups["value"].ToString();
-                            var index = htmlLine.IndexOf(stringToReplace);
-                            htmlLine = $@"{htmlLine.Substring(0,index).Replace("\"", "\\\"")}{{{newString.ToString()}}}{htmlLine.Substring(index + stringToReplace.Length).Replace("\"", "\\\"")}";
+                            var newValue = matches[i].Groups["value"].ToString();
+                            var index = htmlLine.IndexOf(stringToReplace, StringComparison.Ordinal);
+                            htmlLine = $"{htmlLine.Substring(0,index)}\" + {newValue} + \"{htmlLine.Substring(index + stringToReplace.Length)}";
                         }
                     }
-                    else
-                    {
-                        htmlLine = htmlLine.Replace("\"", "\\\"");
-                    }
                     
-                    var lineToAppend = $"html.Append($\"{htmlLine}\").Append(Environment.NewLine);";
+                    var lineToAppend = $"html.Append(\"{htmlLine}\").Append(Environment.NewLine);";
 
-                    sb.Append(lineToAppend).Append(Environment.NewLine);
+                    sb.AppendLine(lineToAppend);
                 }
             }
 

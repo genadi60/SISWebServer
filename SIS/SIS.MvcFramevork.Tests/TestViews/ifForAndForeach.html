@@ -1,5 +1,7 @@
 ﻿<h1>Hello, User!</h1>
-@if(DateTime.Now.Year == 2018)
+<div>@DateTime.UtcNow.Year</div>
+
+@if(DateTime.UtcNow.Year == 2018)
 {
     @foreach( var item in Enumerable.Range(1,3) )
     {

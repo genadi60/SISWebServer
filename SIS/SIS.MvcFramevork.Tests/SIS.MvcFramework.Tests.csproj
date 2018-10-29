@@ -24,6 +24,9 @@
     <None Update="TestViews\IfForAndForeach.Result.html">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+    <None Update="TestViews\viewWithNoCode.html">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Update="TestViews\viewWithNoCode.Result.html">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
