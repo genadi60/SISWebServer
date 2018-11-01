@@ -49,7 +49,7 @@ namespace SIS.MvcFramework
                 
             foreach (var controller in controllers)
             {
-                var methods = controller.GetMethods(BindingFlags.Public | BindingFlags.Instance)
+                var methods = controller.GetMethods()
                     .Where(m => m.CustomAttributes.Any(ca => ca.AttributeType.IsSubclassOf(typeof(HttpAttribute))));
                    
                 foreach (var method in methods)

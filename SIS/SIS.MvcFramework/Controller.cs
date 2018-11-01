@@ -67,7 +67,11 @@
             {
                 viewName = "/" + GlobalConstants.HomeIndex;
             }
-                   
+            else if (!viewName.StartsWith("/"))
+            {
+                viewName = "/" + viewName;
+            }
+            
             var fileName = $"{GlobalConstants.View}{viewName}{GlobalConstants.Html}";
 
             var fileHtml = System.IO.File.ReadAllText(fileName);
@@ -114,11 +118,16 @@
             Response.Content = Encoding.UTF8.GetBytes(content);
         }
 
-        protected IHttpResponse View<T>(string viewName, T model)
+        protected IHttpResponse View<T>(string viewName = null, T model = null, string layout = GlobalConstants.Layout)
+            where T : class
         {
-            if (!viewName.StartsWith("/"))
+            if (viewName == null)
             {
-                viewName = "/" + viewName;
+                viewName = this.Request.Path.Trim('/', '\\');
+                if (string.IsNullOrWhiteSpace(viewName))
+                {
+                    viewName = "Home/Index";
+                }
             }
             
             var content = ProcessFileHtml(viewName, model);
@@ -126,6 +135,17 @@
             PrepareHtmlResult(content);
 
             return Response;
+        }
+
+        protected IHttpResponse View(string viewName = null, string layout = GlobalConstants.Layout)
+        {
+            return View(viewName, (object)null, layout);
+        }
+
+        protected IHttpResponse View<T>(T model = null, string layout = GlobalConstants.Layout)
+            where  T : class
+        {
+           return View(null, model, layout);
         }
 
         protected IHttpResponse BadRequestError(string errorMessage)
