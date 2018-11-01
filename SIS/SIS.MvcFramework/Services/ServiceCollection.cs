@@ -25,7 +25,7 @@
 
         public void AddService<T>(Func<T> p)
         {
-            _serviceFuncsContainer.Add(typeof(T), () => p());
+            _serviceFuncsContainer[typeof(T)] = () => p();
         }
 
         public T CreateInstance<T>()

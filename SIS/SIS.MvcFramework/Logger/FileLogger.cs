@@ -1,7 +1,7 @@
-﻿using System.IO;
-namespace SIS.MvcFramework.Logger
+﻿namespace SIS.MvcFramework.Logger
 {
     using System;
+    using System.IO;
 
     using Contracts;
     using HTTP.Common;
@@ -10,7 +10,7 @@ namespace SIS.MvcFramework.Logger
     {
         private readonly string _filename;
 
-        private static object _lockObject = new object();
+        private static readonly object LockObject = new object();
 
         public FileLogger()
             : this($"log_{DateTime.UtcNow:dd-MM-yyyy}.txt")
@@ -25,7 +25,7 @@ namespace SIS.MvcFramework.Logger
 
         public void Log(string message)
         {
-            lock (_lockObject)
+            lock (LockObject)
             {
                 File.AppendAllText(_filename, $"[{DateTime.UtcNow:hh:mm:ss tt}]: {message}{GlobalConstants.HttpNewLine}");
             }

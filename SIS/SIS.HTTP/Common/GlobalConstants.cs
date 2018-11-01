@@ -26,10 +26,6 @@
 
         public const string ContentDisposition = "Content-Disposition";
 
-        public const string Authorization = "Authorization";
-
-        //public const string Host = "Host";
-
         public const string Location = "Location";
 
         public const string Html = ".html";
@@ -47,7 +43,5 @@
         public const string NotFoundPage = "<h1>This Page Not Found!</h1><div>{0}</div>";
 
         public const string SessionCookieKey = "SIS_ID";
-
-        public const string GreetingString = "<h1>Hello, World!</h1><div>{0}</div>";
     }
 }

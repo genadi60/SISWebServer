@@ -1,4 +1,7 @@
-﻿namespace SIS.MvcFramework
+﻿using SIS.MvcFramework.Logger;
+using SIS.MvcFramework.Logger.Contracts;
+
+namespace SIS.MvcFramework
 {
     using System;
     using System.Collections.Generic;
@@ -24,12 +27,15 @@
         {
             CultureInfo.DefaultThreadCurrentCulture = CultureInfo.InvariantCulture;
 
-            IServiceCollection serviceCollection = new ServiceCollection();
-            application.ConfigureServices(serviceCollection);
+            IServiceCollection collection = new ServiceCollection();
+            application.ConfigureServices(collection);
+            collection.AddService<IHashService, HashService>();
+            collection.AddService<IUserCookieService, UserCookieService>();
+            collection.AddService<ILogger>(() => new FileLogger($"log_{DateTime.UtcNow:dd-MM-yyyy}.txt"));
 
             var serverRoutingTable = new ServerRoutingTable();
 
-            AutoRegisterRoutes(application, serverRoutingTable, serviceCollection);
+            AutoRegisterRoutes(application, serverRoutingTable, collection);
 
             application.Configure();
 
