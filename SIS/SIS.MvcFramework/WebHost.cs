@@ -28,11 +28,11 @@ namespace SIS.MvcFramework
             CultureInfo.DefaultThreadCurrentCulture = CultureInfo.InvariantCulture;
 
             IServiceCollection collection = new ServiceCollection();
-            application.ConfigureServices(collection);
             collection.AddService<IHashService, HashService>();
             collection.AddService<IUserCookieService, UserCookieService>();
             collection.AddService<ILogger>(() => new FileLogger($"log_{DateTime.UtcNow:dd-MM-yyyy}.txt"));
-
+            application.ConfigureServices(collection);
+            
             var serverRoutingTable = new ServerRoutingTable();
 
             AutoRegisterRoutes(application, serverRoutingTable, collection);
