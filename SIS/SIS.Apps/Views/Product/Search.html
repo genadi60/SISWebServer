@@ -1,0 +1,44 @@
+﻿<div>
+    <a href="/shopping/cart">Your Cart</a>
+    <p><span>@Model.ProductsInCartCount </span>@Model.TextForCount</p>
+
+</div><br />
+@if(Model.ProductViewModels.Count == 0)
+{
+    @if(Model.SearchTerm == null)
+    {
+        <h2 class="text text-info">Please, make a Choice.</h2>
+    }
+    @else
+    {
+        <h2 class=" text text-info">No cake found on your search.</h2>
+    }
+}
+@else
+{
+    <div class="row">
+        <div class="col-sm-3"></div>
+        <table class="table table-bordered table-striped col-sm-6 ">
+            <tbody>
+            <tr>
+                <th scope="col" class="col-sm-4">Name</th>
+                <th scope="col" class="col-sm-1">Price</th>
+                <th scope="col" class="col-sm-1">Order</th>
+            </tr>
+            @foreach (var product in Model.ProductViewModels)
+            {
+            <tr >
+                <td><a class="btn btn-outline-primary col-sm-12" href="/product/cakeDetails?id=@product.Id">@product.Name</a></td>
+                <td>
+                    <p>$@product.Price</p>
+                </td>
+                <td>
+                    <a class="btn btn-outline-primary" href="/shopping/add?id=@product.Id"><i class="fas fa-cart-plus"></i> Add to Cart</a>
+                </td>
+            </tr>
+            }
+            </tbody>
+        </table>
+        <div class="col-sm-3"></div>
+    </div>
+}

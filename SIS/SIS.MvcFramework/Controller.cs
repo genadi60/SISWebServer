@@ -1,8 +1,8 @@
 ﻿namespace SIS.MvcFramework
 {
     using System.Collections.Generic;
-    using System.Linq;
-    
+    using System.Text;
+
     using HTTP.Common;
     using HTTP.Enums;
     using HTTP.Headers;
@@ -11,22 +11,22 @@
     using HTTP.Responses.Contracts;
     using HTTP.Sessions;
     using Services.Contracts;
-    using System.Text;
+    using ViewModels;
 
     public abstract class Controller
     {
-        private const string ContentPlaceholder = "{{{content}}}";
+        private const string ContentPlaceholder = "@RenderBody";
 
         protected Controller()
         {
             Response = new HttpResponse {StatusCode = HttpResponseStatusCode.OK};
-            var session = HttpSessionStorage.GetSession("viewData");
-            if (!session.ContainsParameter("viewData"))
+            var session = HttpSessionStorage.GetSession("tempData");
+            if (!session.ContainsParameter("tempData"))
             {
-                session.AddParameter("viewData", new Dictionary<string, string>());
+                session.AddParameter("tempData", new Dictionary<string, string>());
                
             }
-            ViewData = (Dictionary<string, string>)session.GetParameter("viewData");
+            TempData = (Dictionary<string, string>)session.GetParameter("tempData");
         }
 
         public IUserCookieService UserCookieService { get; internal set; }
@@ -37,48 +37,48 @@
 
         protected IHttpResponse Response { get; set; }
 
-        protected Dictionary<string, string> ViewData { get; set; }
+        public ViewEngine.ViewEngine ViewEngine { get; set; }
+
+        protected Dictionary<string, string> TempData { get; set; }
 
         protected string User
         {
             get
             {
-                if (!Request.Cookies.HasCookies() || !Request.Cookies.ContainsCookie(".auth_cake"))
+                string userName = null;
+
+                if (!Request.Session.ContainsParameter(".auth_cake") && !Request.Cookies.ContainsCookie(".auth_cake"))
                 {
                     return null;
                 }
 
-                var cookie = Request.Cookies.GetCookie(".auth_cake");
-                var cookieContent = cookie.Value;
-                var userName = UserCookieService.GetUserData(cookieContent);
+                if (Request.Session.ContainsParameter(".auth_cake"))
+                {
+                    userName = UserCookieService.GetUserData(Request.Session.GetParameter(".auth_cake").ToString());
+                }
+                
                 return userName;
             }
         }
 
-        private string ProcessFileHtml(string viewName, string layout = GlobalConstants.Layout)
+        private string ProcessFileHtml<T>(string viewName, T model,  string layout = GlobalConstants.Layout)
         {
             if ("/".Equals(viewName))
             {
-                viewName = GlobalConstants.HomeIndex;
+                viewName = "/" + GlobalConstants.HomeIndex;
             }
                    
-            viewName = $"{GlobalConstants.View}{viewName}{GlobalConstants.Html}";
-           
-            var layoutHtml = System.IO.File.ReadAllText($"{GlobalConstants.View}{layout}");
+            var fileName = $"{GlobalConstants.View}{viewName}{GlobalConstants.Html}";
 
-            var fileHtml = System.IO.File.ReadAllText(viewName);
+            var fileHtml = System.IO.File.ReadAllText(fileName);
 
-            var content = layoutHtml.Replace(ContentPlaceholder, fileHtml);
+            var layoutHtml = System.IO.File.ReadAllText($"{GlobalConstants.View}/{layout}{GlobalConstants.Html}");
 
-            if (ViewData.Any())
-            {
-                foreach (var value in ViewData)
-                {
-                    content = content.Replace($"{{{{{{{value.Key}}}}}}}", value.Value);
-                }
-            }
+            layoutHtml = layoutHtml.Replace(ContentPlaceholder, fileHtml);
 
-            return content;
+            var cSharpContent = ViewEngine.GetHtml(viewName, layoutHtml, model, User);
+
+            return cSharpContent;
         }
 
         protected IHttpResponse File(byte[] content)
@@ -114,9 +114,14 @@
             Response.Content = Encoding.UTF8.GetBytes(content);
         }
 
-        protected IHttpResponse View(string viewName)
+        protected IHttpResponse View<T>(string viewName, T model)
         {
-            var content = ProcessFileHtml(viewName);
+            if (!viewName.StartsWith("/"))
+            {
+                viewName = "/" + viewName;
+            }
+            
+            var content = ProcessFileHtml(viewName, model);
 
             PrepareHtmlResult(content);
 
@@ -149,41 +154,16 @@
 
             return Response;
         }
-
-        protected bool IsAuthenticated()
+        
+        protected void SetDefaultTempData()
         {
-            if (!Request.Cookies.HasCookies() || !Request.Cookies.ContainsCookie(".auth_cake") || !Request.Session.ContainsParameter(".auth_cake"))
-            {
-                ViewData["authenticated"] = "none";
-                ViewData["notAuthenticated"] = "bloc";
-                ViewData["visible"] = "bloc";
-
-                return false;
-            }
-            ViewData["authenticated"] = "bloc";
-            ViewData["notAuthenticated"] = "none";
-            ViewData["visible"] = "bloc";
-            ViewData["cart"] = "bloc";
-            if (!ViewData.ContainsKey("searchTerm"))
-            {
-                ViewData["searchTerm"] = null;
-            }
-
-            return true;
-        }
-
-        protected void SetDefaultViewData()
-        {
-            ViewData["authenticated"] = "none";
+            TempData["searchTerm"] = null;
         }
 
         private string PrepareErrorData(HttpResponseStatusCode statusCode, string errorMessage)
         {
-            ViewData["errorMessage"] = errorMessage;
-            ViewData["title"] = "Error";
-            ViewData["visible"] = "none";
-
-            var content = ProcessFileHtml("error");
+            var model = new ErrorViewModel(errorMessage);
+            var content = ProcessFileHtml("/error", model);
             Response.StatusCode = statusCode;
             return content;
         }

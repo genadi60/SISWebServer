@@ -1,0 +1,32 @@
+﻿<h2>My Profile</h2>
+@var date = Model.RegistrationDate.ToString("dd-MM-yyyy");
+<div class="row">
+    <div class="col-sm-3"></div>
+    <div class="col-sm-6">
+        <table class="table table-striped table-bordered ">
+            <tbody>
+            <tr>
+                <th scope="row">Name</th>
+                <td>@Model.Name</td>
+            </tr>
+            <tr>
+                <th scope="row">Username</th>
+                <td>@Model.Username</td>
+            </tr>
+            <tr>
+                <th scope="row">Registration on</th>
+                <td>@date</td>
+            </tr>
+            <tr>
+                <th scope="row">Orders Count</th>
+                <td>@Model.TotalOrders</td>
+            </tr>
+            </tbody>
+        </table>
+        @if(Model.TotalOrders > 0)
+        {
+        <a class="btn btn-outline-primary" href="/user/myOrders">My Orders</a>
+        }
+    </div>
+    <div class="col-sm-3"></div>
+</div>

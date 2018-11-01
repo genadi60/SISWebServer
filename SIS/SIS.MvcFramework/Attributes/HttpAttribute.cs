@@ -1,11 +1,8 @@
 ﻿using SIS.HTTP.Enums;
-using System;
-using System.Collections.Generic;
-using System.Net.Http;
-using System.Text;
-
 namespace SIS.MvcFramework.Attributes
 {
+    using System;
+
     public abstract class HttpAttribute : Attribute
     {
         public string Path { get; }
@@ -13,6 +10,10 @@ namespace SIS.MvcFramework.Attributes
 
         protected HttpAttribute(string path)
         {
+            if (!path.StartsWith("/"))
+            {
+                path = "/" + path;
+            }
             Path = path;
         }
     }

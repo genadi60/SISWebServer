@@ -72,6 +72,7 @@
             controllerInstance.Request = request;
             controllerInstance.UserCookieService = serviceCollection.CreateInstance<IUserCookieService>();
             controllerInstance.HashService = serviceCollection.CreateInstance<IHashService>();
+            controllerInstance.ViewEngine = new ViewEngine.ViewEngine();
 
             var parameters = GetMethodParameters(methodInfo, request, serviceCollection).ToArray();
 

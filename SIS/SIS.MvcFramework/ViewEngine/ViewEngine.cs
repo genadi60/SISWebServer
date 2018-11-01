@@ -14,9 +14,9 @@
 
     public class ViewEngine : IViewEngine
     {
-        public string GetHtml<T>(string viewName, string viewCode, T model)
+        public string GetHtml<T>(string viewName, string viewCode, T model, string user)
         {
-            var viewTypeName = viewName + "View";
+            var viewTypeName = viewName.Replace("/", "_") + "View";
 
             var csharpMethodBody = GenerateCSharpMethodBody(viewCode);
             //1.viewCode => C# code
@@ -33,11 +33,12 @@ namespace MyAppView
 {{
     public class {viewTypeName} : IView<{typeof(T).FullName.Replace("+", ".")}>
     {{
-        public string GetHtml({typeof(T).FullName.Replace("+", ".")} model)
+        public string GetHtml({typeof(T).FullName.Replace("+", ".")} model, string user)
         {{
             var html = new StringBuilder();
 
             var Model = model;
+            var User = user;
 
             {csharpMethodBody}
 
@@ -53,7 +54,7 @@ namespace MyAppView
             {
                 throw new Exception("Model can not be instantiated.");
             }
-            string html = instanceOfViewClass.GetHtml(model);
+            string html = instanceOfViewClass.GetHtml(model, user);
 
             return html;
         }
@@ -128,7 +129,7 @@ namespace MyAppView
                 else
                 {
                     htmlLine = htmlLine.Replace("\"", "\\\"");
-                    var pattern = @"@(?<value>[^< ]+)";
+                    var pattern = @"@(?<value>[^< \\]+)";
                     var regex = new Regex(pattern);
                     var matches = regex.Matches(htmlLine).ToArray();
                     if (matches.Length > 0)

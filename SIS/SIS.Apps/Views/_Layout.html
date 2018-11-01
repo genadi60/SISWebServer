@@ -1,0 +1,103 @@
+﻿<!DOCTYPE html>
+
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="description" content="Buy the cake in By the Cake">
+    <meta name="keywords" content="cakes, buy">
+    <meta name="author" content="Genadi">
+    <title>@Model.Title</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css" integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.4.1/css/all.css" integrity="sha384-5sAR7xN1Nv6T6+dT2mhtzEpVJvfS3NScPQTrOxhwjIuvcA67KV2R5Jz6kr4abQsz" crossorigin="anonymous">
+</head>
+<body style="background-color: rgba(255, 215, 0, 0.22)">
+<nav class="navbar sticky-top navbar-expand-lg container-fluid" style="background-color: #fac520">
+    <div class="container-fluid">
+        <form class=" navbar-nav form-inline">
+        <a class="navbar-brand" href="/"><i class="fas fa-birthday-cake"></i> The Cake</a>
+            
+                <ul class="navbar-nav form-inline">
+                    <li class="nav-item ">
+
+                        <a class="nav-link " href="/"><i class="fas fa-home"></i></a>
+                    </li>
+                </ul>
+           
+        </form>
+        <form class="form-inline" method="get" action="/product/search">
+            @if(User == null)
+            {
+            <div class="form-inline">
+                <ul class="navbar-nav form-inline">
+                    <li class="nav-item">
+
+                        <a class="nav-link" href="/account/login">Log <i class="fas fa-sign-in-alt"></i> </a>
+
+                    </li>
+                    <li class="nav-item">
+
+                        <a class="nav-link" href="/account/register"><i class="fas fa-user-plus"></i></a>
+
+                    </li>
+                </ul>
+            </div>
+            }else
+            {
+            <div class="form-inline">
+                <ul class="navbar-nav form-inline">
+                    <li class="nav-item">
+
+                        <a class="nav-link" href="/user/hello"><i class="far fa-hand-paper"></i> @User</a>
+
+                    </li>
+                    <li class="nav-item">
+
+                        <a class="nav-link" href="/shopping/cart"><i class="fas fa-shopping-cart"></i></a>
+
+                    </li>
+                    <li class="nav-item">
+
+                        <a class="nav-link" href="/product/add"><i class="fas fa-plus"></i> Cake</a>
+
+                    </li>
+                    <li class="nav-item">
+
+                        <a class="nav-link" href="/user/profile">My <i class="far fa-user-circle"></i></a>
+
+                    </li>
+                    <li class="nav-item">
+
+                        <a class="nav-link" href="/account/logout">Log <i class="fas fa-sign-out-alt"></i></a>
+
+                    </li>
+                </ul>
+                
+                    <input class="form-control mr-sm-1" name="searchTerm" type="search" placeholder="Search" aria-label="Search">
+                    <button class="btn btn-outline-primary my-2 my-sm-0" type="submit"><i class="fas fa-search"></i></button>
+                
+                </div>
+            }
+        </form>
+    </div>
+</nav>
+<div class="row">
+    <div class="col-sm-2"></div>
+    <div class="jumbotron jumbotron-fluid col-sm-8 text-center">
+        @RenderBody
+    </div>
+    <div class="col-sm-2"></div>
+</div>
+    <footer style="background-color: #fac520; text-align: center">
+        &copy;All Rights Reserved.
+        <pre>
+        City: Hong Kong                     City: Salzburg
+        Address: ChoCoLad 18                Address: SchokoLeiden 73
+        Phone: +78952804429                 Phone: +49241432990
+    </pre>
+    </footer>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js" integrity="sha384-ChfqqxuZUCnJSK3+MXmPNIyE6ZbWh2IMqE241rYiqJxyMiZ6OW/JmZQ5stwEULTy" crossorigin="anonymous"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js"></script>
+</body>
+</html>

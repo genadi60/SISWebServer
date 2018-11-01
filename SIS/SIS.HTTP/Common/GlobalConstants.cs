@@ -28,17 +28,17 @@
 
         public const string Authorization = "Authorization";
 
-        public const string Host = "Host";
+        //public const string Host = "Host";
 
         public const string Location = "Location";
 
         public const string Html = ".html";
 
-        public const string HomeIndex = "home/index";
+        public const string HomeIndex = "Home/Index";
 
-        public const string Layout = "_layout.html";
+        public const string Layout = "_Layout";
 
-        public const string View = "views/";
+        public const string View = "Views";
 
         public const string StartMessage = "Server started at http://{0}:{1}";
 

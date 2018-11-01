@@ -1,0 +1,40 @@
+﻿<h1>Your Cart</h1>
+<form method="get" action="/product/search">
+    <a class="btn btn-outline-primary" href="/product/search">Search cakes</a>
+</form>
+@if(Model.ProductViewModels.Count > 0)
+{
+<div class="row">
+    <div class="col-sm-3"></div>
+    <table class="table table-bordered table-striped col-sm-6">
+        <tbody>
+            <tr>
+                <th scope="col">Name</th>
+                <th scope="col">Price</th>
+                <th scope="col">Clear</th>
+            </tr>
+            @foreach (var product in Model.ProductViewModels)
+            {
+            <tr>
+                <td>@product.Name</td>
+                <td>$@product.Price</td>
+                <td><a class="btn btn-outline-primary" href="/shopping/cart?clearProduct=@product.Id"><i class="far fa-thumbs-down"></i> Clear</a></td>
+            </tr>
+            }
+
+        </tbody>
+    </table>
+    <div class="col-sm-3"></div>
+</div>
+<div>
+    <hr />
+    Total Cost: $@Model.TotalCosts
+    <hr />
+    <form method="post" action="/shopping/finishOrder">
+        <input class="btn btn-outline-primary" type="submit" value="Finish Order" />
+    </form>
+    <hr />
+</div>
+}else{
+<div>No products in Your Cart</div>
+}
