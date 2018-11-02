@@ -34,14 +34,5 @@ namespace CakesWebApp.Controllers
             model.Username = User;
             return View("/user/hello", model);
         }
-
-        
-        [HttpGet("/user/myOrders")]
-        public IHttpResponse MyOrders(MyOrdersViewModel model)
-        {
-            model.MyOrders = _userService.GetMyOrders(User, Db);
-
-            return View("/user/myOrders", model);
-        }
     }
 }

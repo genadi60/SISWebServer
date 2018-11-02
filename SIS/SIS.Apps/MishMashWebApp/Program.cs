@@ -12,17 +12,17 @@ namespace MishMashWebApp
         {
             Console.OutputEncoding = Encoding.UTF8;
 
-            //InitializeDatabase();
+            InitializeDatabase();
 
             WebHost.Start(new Startup());
         }
 
-        //private static void InitializeDatabase()
-        //{
-            //using (var db = new MishMashDbContext())
-            //{
-                //db.Database.Migrate();
-            //}
-        //}
+        private static void InitializeDatabase()
+        {
+            using (var db = new MishMashDbContext())
+            {
+                db.Database.Migrate();
+            }
+        }
     }
 }

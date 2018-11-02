@@ -12,14 +12,19 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="InputModels\" />
-  </ItemGroup>
-
-  <ItemGroup>
     <ProjectReference Include="..\..\SIS.MvcFramework\SIS.MvcFramework.csproj" />
   </ItemGroup>
 
   <ItemGroup>
+    <None Update="Views\Error.html">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Views\Text.html">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Views\Users\Registered.html">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Update="wwwroot\bootstrap.min.css">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
