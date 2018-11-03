@@ -50,22 +50,22 @@ namespace SIS.MvcFramework
                 
             foreach (var controller in controllers)
             {
-                var methods = controller.GetMethods()
-                    .Where(m => m.CustomAttributes.Any(ca => ca.AttributeType.IsSubclassOf(typeof(HttpAttribute))));
-                   
+                var methods = controller.GetMethods(BindingFlags.Instance | BindingFlags.Public | BindingFlags.DeclaredOnly);
+                  
                 foreach (var methodInfo in methods)
                 {
                     var httpAttribute =
                         (HttpAttribute)methodInfo.GetCustomAttributes(true).FirstOrDefault(ca => ca.GetType().IsSubclassOf(typeof(HttpAttribute)));
+                    
+                    string path = null;
+                    var method = HttpRequestMethod.GET;
 
-                    if (httpAttribute == null)
+                    if (httpAttribute != null)
                     {
-                        continue;
+                        path = httpAttribute.Path;
+                        method = httpAttribute.Method;
                     }
-
-                    var path = httpAttribute.Path;
-                    var method = httpAttribute.Method;
-
+                    
                     if (path == null)
                     {
                         var controllerName = controller.Name;
@@ -75,7 +75,7 @@ namespace SIS.MvcFramework
                         }
                         var actionName = methodInfo.Name;
                         path = $"/{controllerName}/{actionName}";
-                        //TODO:implemented via controller and action
+                        
                     }
                     else if (!path.StartsWith("/"))
                     {

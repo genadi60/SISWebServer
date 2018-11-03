@@ -1,34 +1,21 @@
-﻿using System.Collections.Generic;
-using System.Linq;
-using MishMashWebApp.Services;
-using MishMashWebApp.Services.Contracts;
-using MishMashWebApp.ViewModels.Channels;
-
-namespace MishMashWebApp.Controllers
+﻿namespace MishMashWebApp.Controllers
 {
+    using System.Collections.Generic;
+    using System.Linq;
+
+    using ViewModels.Channels;
     using SIS.HTTP.Responses.Contracts;
-    using SIS.MvcFramework.Attributes;
     using ViewModels.Home;
-    
+
     public class HomeController : BaseController
     {
-        private readonly IChannelService _channelService;
-
-        public HomeController(IChannelService channelService)
-        {
-            _channelService = channelService;
-        }
-
-        [HttpGet]
         public IHttpResponse Index()
         {
-            
             var user = Db.Users.FirstOrDefault(u => u.Username.Equals(User.Username));
 
             if (user != null)
             {
-
-            var channelModels = Db.Channels
+                var channelModels = Db.Channels
                 .Select(c => new BaseChannelViewModel
                 {
                     Id = c.Id,
@@ -39,48 +26,36 @@ namespace MishMashWebApp.Controllers
                     FollowersIds = c.Followers.Select(f => f.UserId).ToList()
                 }).ToList();
 
-            var followedChannels = channelModels
-                .Where(c => c.FollowersIds.Contains(user.Id))
-                .ToList();
+                var followedChannels = channelModels
+                    .Where(c => c.FollowersIds.Contains(user.Id))
+                    .ToList();
 
-            var followedChannelsTags = new List<int>();
-            followedChannels.ForEach(c => followedChannelsTags.AddRange(c.ChannelTagsIds));
+                var followedChannelsTags = new List<int>();
+                followedChannels.ForEach(c => followedChannelsTags.AddRange(c.ChannelTagsIds));
 
-            var suggestedChannels = channelModels
-                .Where(c => !followedChannels.Select(fc => fc.Id).ToList().Contains(c.Id)
-                            && c.ChannelTagsIds.Any(ct => followedChannelsTags.Contains(ct)))
-                .ToList();
+                var suggestedChannels = channelModels
+                    .Where(c => !followedChannels.Select(fc => fc.Id).ToList().Contains(c.Id)
+                                && c.ChannelTagsIds.Any(ct => followedChannelsTags.Contains(ct)))
+                    .ToList();
 
-            var unionChannelsIds =
-                followedChannels.Select(c => c.Id).Concat(suggestedChannels.Select(c => c.Id)).ToList();
+                var unionChannelsIds =
+                    followedChannels.Select(c => c.Id).Concat(suggestedChannels.Select(c => c.Id)).ToList();
 
-            var seeOtherChannels = channelModels.Where(c => !unionChannelsIds.Contains(c.Id)).ToList();
-            
-            var model = new LoggedInIndexViewModel();
+                var seeOtherChannels = channelModels.Where(c => !unionChannelsIds.Contains(c.Id)).ToList();
 
-          
-                model.Role = user.Role.ToString();
+                var model = new LoggedInIndexViewModel
+                {
+                    Role = user.Role.ToString(),
 
-                model.YourChannels = followedChannels;
-                model.SuggestedChannels = suggestedChannels;
-                model.SeeOtherChannels = seeOtherChannels;
+                    YourChannels = followedChannels,
+                    SuggestedChannels = suggestedChannels,
+                    SeeOtherChannels = seeOtherChannels
+                };
 
                 return View("Home/LoggedInIndex", model);
-
-                
             }
             
-           
-                return View("Home/Index");
-         
-          
-            
+            return View("Home/Index");
         }
-
-        //[HttpGet]
-        //public IHttpResponse RootIndex()
-        //{
-        //    return Index();
-        //}
     }
 }

@@ -1,13 +1,15 @@
-﻿using System.Linq;
-using MishMashWebApp.InputModels.Channels;
-using MishMashWebApp.Models.Enums;
-using MishMashWebApp.Services.Contracts;
-using SIS.HTTP.Responses.Contracts;
-using SIS.MvcFramework.Attributes;
-using SIS.MvcFramework.ViewModel;
-
-namespace MishMashWebApp.Controllers
+﻿namespace MishMashWebApp.Controllers
 {
+    using System.Linq;
+
+    using InputModels.Channels;
+    using Models.Enums;
+    using Services.Contracts;
+    using SIS.HTTP.Responses.Contracts;
+    using SIS.MvcFramework.Attributes;
+    using SIS.MvcFramework.ViewModel;
+
+
     public class ChannelsController : BaseController
     {
         private readonly IChannelService _channelService;
@@ -16,8 +18,7 @@ namespace MishMashWebApp.Controllers
         {
             _channelService = channelService;
         }
-
-        [HttpGet("/Channels/Details")]
+        
         public IHttpResponse Details(ChannelInputModel model)
         {
             if (User == null)
@@ -30,7 +31,6 @@ namespace MishMashWebApp.Controllers
             return View("/Channels/Details", viewModel);
         }
 
-        [HttpGet("/Channels/Followed")]
         public IHttpResponse Followed()
         {
             if (User == null)
@@ -44,7 +44,6 @@ namespace MishMashWebApp.Controllers
 
         }
         
-        [HttpGet("/Channels/Follow")]
         public IHttpResponse Follow(ChannelInputModel model)
         {
             if (User == null)
@@ -63,7 +62,6 @@ namespace MishMashWebApp.Controllers
             return View("/Error", new ErrorViewModel(errorMessage));
         }
 
-        [HttpGet("/Channels/Unfollow")]
         public IHttpResponse Unfollow(ChannelInputModel model)
         {
             if (User == null)
@@ -81,7 +79,6 @@ namespace MishMashWebApp.Controllers
             return Redirect("/Channels/Followed");
         }
 
-        [HttpGet("/Channels/Create")]
         public IHttpResponse Create()
         {
             var user = Db.Users.FirstOrDefault(u => u.Username.Equals(User.Username));
