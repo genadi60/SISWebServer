@@ -6,7 +6,7 @@ using SIS.HTTP.Common;
 using SIS.HTTP.Cookies;
 using SIS.HTTP.Responses.Contracts;
 using SIS.MvcFramework.Attributes;
-using SIS.MvcFramework.ViewModels;
+using SIS.MvcFramework.ViewModel;
 
 namespace CakesWebApp.Controllers
 {
@@ -97,7 +97,7 @@ namespace CakesWebApp.Controllers
                 return View("error", new ErrorViewModel(errorMessage));
             }
 
-            var cookieContent = UserCookieService.GetUserCookie(model.Username);
+            var cookieContent = UserCookieService.GetUserCookie(User);
 
             Request.Session.AddParameter(".auth_cake", cookieContent);
 

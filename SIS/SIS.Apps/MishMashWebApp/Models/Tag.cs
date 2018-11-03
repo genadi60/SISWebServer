@@ -1,7 +1,7 @@
-﻿using System.Collections.Generic;
-
-namespace MishMashWebApp.Models
+﻿namespace MishMashWebApp.Models
 {
+    using System.Collections.Generic;
+
     public class Tag
     {
         public int Id { get; set; }

@@ -1,14 +1,18 @@
-﻿using MishMashWebApp.InputModels.Users;
-using MishMashWebApp.Services.Contracts;
-using MishMashWebApp.ViewModels;
-using SIS.HTTP.Common;
-using SIS.HTTP.Cookies;
-using SIS.HTTP.Responses.Contracts;
-using SIS.MvcFramework.Attributes;
-using SIS.MvcFramework.ViewModels;
+﻿using System.Linq;
+using MishMashWebApp.Models.Enums;
+using SIS.MvcFramework;
+using SIS.MvcFramework.ViewModel;
 
 namespace MishMashWebApp.Controllers
 {
+    using InputModels.Users;
+    using Services.Contracts;
+    using SIS.HTTP.Common;
+    using SIS.HTTP.Cookies;
+    using SIS.HTTP.Responses.Contracts;
+    using SIS.MvcFramework.Attributes;
+    using ViewModels.Home;
+
     public class UsersController : BaseController
     {
         private readonly IUserService _userService;
@@ -22,7 +26,7 @@ namespace MishMashWebApp.Controllers
         public HomeViewModel Model { get; set; }
 
         [HttpGet("/Users/Login")]
-        public IHttpResponse Login(HomeViewModel model)
+        public IHttpResponse Login(LoginInputModel model)
         {
             return View("Users/Login", model);
         }
@@ -30,27 +34,31 @@ namespace MishMashWebApp.Controllers
         [HttpPost("/Users/Login")]
         public IHttpResponse DoLogin(LoginInputModel model)
         {
-            bool isLogged = _userService.UserLogin(model, Db);
-
-            if (!isLogged)
+            if (!_userService.UserIsAuthenticated(model, Db))
             {
                 var errorMessage = "Invalid username or password.";
                 return View("error", new ErrorViewModel(errorMessage));
             }
 
-            var cookieContent = UserCookieService.GetUserCookie(model.Username);
+
+            var user = Db.Users.FirstOrDefault(u => u.Username.Equals(model.Username));
+
+            var mvcUser = new MvcUserInfo { Username = user.Username, Role = user.Role.ToString(), Info = user.Email };
+
+            var cookieContent = UserCookieService.GetUserCookie(mvcUser);
 
             Request.Session.AddParameter(".auth_cake", cookieContent);
 
             Response.Cookies.Add(new HttpCookie(".auth_cake", $"{cookieContent}; {GlobalConstants.HttpOnly}", 7));
 
-            return View("/Home/Index", Model);
+
+            return View("/Home/Index");
 
         }
 
 
         [HttpGet("/Users/Register")]
-        public IHttpResponse Register(HomeViewModel model)
+        public IHttpResponse Register(RegisterInputModel model)
         {
             return View("Users/Register", model);
         }
@@ -75,9 +83,14 @@ namespace MishMashWebApp.Controllers
                 errorMessage = "Passwords do not match.";
             }
 
-            bool isCreated = _userService.Create(model, Db);
+            if (!Db.Users.Any())
+            {
+                model.Role = Role.Admin;
+            }
 
-            if (!isCreated)
+            bool isRegistered = _userService.Create(model, Db);
+
+            if (!isRegistered)
             {
                 errorMessage = $"User with username: {model.Username} already exists.";
             }
@@ -94,6 +107,8 @@ namespace MishMashWebApp.Controllers
         [HttpGet("/Users/Logout")]
         public IHttpResponse Logout()
         {
+            Request.Session.ClearParameters();
+
             if (User != null)
             {
                 var cookie = Request.Cookies.GetCookie(".auth_cake");
@@ -101,17 +116,9 @@ namespace MishMashWebApp.Controllers
                 cookie.Delete();
 
                 Response.Cookies.Add(cookie);
-
-                Request.Session.ClearParameters();
             }
 
-            if (Request.Session.ContainsParameter(".auth_cake"))
-            {
-                Request.Session.ClearParameters();
-
-            }
-
-            return View("/Home/Index", Model);
+            return Redirect("/");
         }
     }
 }

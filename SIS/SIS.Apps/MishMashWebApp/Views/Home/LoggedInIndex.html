@@ -6,50 +6,50 @@
 {
 <h1 class="text-center text-mishmash">Welcome, @User.Username!</h1>
 }
-
+<br/>
 <h2 class="text-mishmash">Your channels</h2>
-<hr class="hr-2 bg-white text-white" />
+<hr class="hr-2 bg-mishmash" />
 <div class="container-fluid">
-    <div class="row justify-content-around">
+    <div class="row d-flex justify-content-start">
         @for(var i = 0; i < Model.YourChannels.Count(); i++)
         {
         { var channel = Model.YourChannels.ToList()[i]; }
-        @if (i % 5 == 0 && i > 1)
+        @if (i % 5 == 0 && i > 0)
         {
     </div>
-    <div class="row justify-content-around mt-3">
+    <div class="row d-flex justify-content-start mt-3">
         }
-        <div class="col-md-2 bg-mishmash text-center text-white">
-            @channel.Name
+        <div class="rounded col-md-2 mx-3 bg-mishmash text-center text-white">
+            <span>@channel.Name</span>
             <hr class="hr-2 bg-white text-white" />
-            @channel.Type Channel
+            <span>@channel.Type Channel</span>
             <hr class="hr-2 bg-white text-white" />
-            @channel.FollowersCount Following
+            <span>@channel.FollowersCount Following</span>
             <hr class="hr-2 bg-white text-white" />
-            Following
+            <span>Following</span>
         </div>
         }
     </div>
 </div>
-
+<br/>
 <h2 class="text-mishmash">Suggested</h2>
-<hr class="hr-2 bg-white text-white" />
+<hr class="hr-2 bg-mishmash" />
 <div class="container-fluid">
-    <div class="row justify-content-around">
+    <div class="row d-flex justify-content-start">
         @for(var i = 0; i < Model.SuggestedChannels.Count(); i++)
         {
         { var channel = Model.SuggestedChannels.ToList()[i]; }
-        @if (i % 5 == 0 && i > 1)
+        @if (i % 5 == 0 && i > 0)
         {
     </div>
-    <div class="row justify-content-around mt-3">
+    <div class="row d-flex justify-content-start mt-3">
         }
-        <div class="col-md-2 bg-mishmash text-center text-white">
-            @channel.Name
+        <div class="rounded col-md-2 mx-3 bg-mishmash text-center text-white">
+            <span>@channel.Name</span>
             <hr class="hr-2 bg-white text-white" />
-            @channel.Type Channel
+            <span>@channel.Type Channel</span>
             <hr class="hr-2 bg-white text-white" />
-            @channel.FollowersCount Following
+            <span>@channel.FollowersCount Following</span>
             <hr class="hr-2 bg-white text-white" />
             <a href="/Channels/Follow?id=@channel.Id" class="text-white">Follow</a> &nbsp;
             <a href="/Channels/Details?id=@channel.Id" class="text-white">Details</a>
@@ -57,25 +57,25 @@
         }
     </div>
 </div>
-
+<br/>
 <h2 class="text-mishmash">See other</h2>
-<hr class="hr-2 bg-white text-white" />
+<hr class="hr-2 bg-mishmash" />
 <div class="container-fluid">
-    <div class="row justify-content-around">
+    <div class="row d-flex justify-content-start">
         @for(var i = 0; i < Model.SeeOtherChannels.Count(); i++)
         {
         { var channel = Model.SeeOtherChannels.ToList()[i]; }
-        @if (i % 5 == 0 && i > 1)
+        @if (i % 5 == 0 && i > 0)
         {
     </div>
-    <div class="row justify-content-around mt-3">
+    <div class="row d-flex justify-content-start mt-3">
         }
-        <div class="col-md-2 bg-mishmash text-center text-white">
-            @channel.Name
+        <div class="rounded col-md-2 mx-3 bg-mishmash text-center text-white">
+            <span>@channel.Name</span>
             <hr class="hr-2 bg-white text-white" />
-            @channel.Type Channel
+            <span>@channel.Type Channel</span>
             <hr class="hr-2 bg-white text-white" />
-            @channel.FollowersCount Following
+            <span>@channel.FollowersCount Following</span>
             <hr class="hr-2 bg-white text-white" />
             <a href="/Channels/Follow?id=@channel.Id" class="text-white">Follow</a> &nbsp;
             <a href="/Channels/Details?id=@channel.Id" class="text-white">Details</a>

@@ -1,13 +1,14 @@
-﻿using System.Linq;
-using MishMashWebApp.Data;
-using MishMashWebApp.InputModels.Users;
-using MishMashWebApp.Models;
-using MishMashWebApp.Services.Contracts;
-using MishMashWebApp.ViewModels.Users;
-using SIS.MvcFramework.Services.Contracts;
-
-namespace MishMashWebApp.Services
+﻿namespace MishMashWebApp.Services
 {
+    using System.Linq;
+
+    using Contracts;
+    using Data;
+    using InputModels.Users;
+    using Models;
+    using SIS.MvcFramework.Services.Contracts;
+    using ViewModels.Users;
+
     public class UserService : IUserService
     {
         private readonly IHashService _hashService;
@@ -27,13 +28,13 @@ namespace MishMashWebApp.Services
             }
         }
 
-        public ProfileViewModel Profile(string username, MishMashDbContext context)
+        public UserViewModel Profile(string username, MishMashDbContext context)
         {
             using (var db = context)
             {
                 var model = db.Users
                     .Where(u => u.Username == username)
-                    .Select(u => new ProfileViewModel
+                    .Select(u => new UserViewModel
                     {
                         Username = u.Username,
                         Email = u.Email
@@ -82,27 +83,25 @@ namespace MishMashWebApp.Services
             }
         }
 
-        public bool UserLogin(LoginInputModel model, MishMashDbContext context)
+        public bool UserIsAuthenticated(LoginInputModel model, MishMashDbContext context)
         {
-            if (string.IsNullOrWhiteSpace(model.Username) || string.IsNullOrWhiteSpace(model.Password)
-                                                          || string.IsNullOrEmpty(model.Username) || string.IsNullOrEmpty(model.Password))
+            if (string.IsNullOrWhiteSpace(model.Username)
+                || string.IsNullOrWhiteSpace(model.Password)
+                || string.IsNullOrEmpty(model.Username) 
+                || string.IsNullOrEmpty(model.Password))
             {
                 return false;
             }
 
             var hashedPassword = _hashService.Hash(model.Password);
 
-            using (context)
-            {
-                var user = context.Users.FirstOrDefault(u => u.Username.Equals(model.Username));
-
-                bool isEqual = user != null && user.Username.Equals(model.Username);
-
-                if (!context.Users.Any(u => u.Password.Equals(hashedPassword)) || !isEqual)
+           
+            
+                if (!context.Users.Any(u => u.Password.Equals(hashedPassword) && u.Username.Equals(model.Username)))
                 {
                     return false;
                 }
-            }
+           
 
             return true;
         }

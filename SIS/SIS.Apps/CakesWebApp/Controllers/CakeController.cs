@@ -6,7 +6,7 @@ using CakesWebApp.ViewModels.Product;
 using CakesWebApp.ViewModels.Shopping;
 using SIS.HTTP.Responses.Contracts;
 using SIS.MvcFramework.Attributes;
-using SIS.MvcFramework.ViewModels;
+using SIS.MvcFramework.ViewModel;
 
 namespace CakesWebApp.Controllers
 {

@@ -1,8 +1,8 @@
-﻿using MishMashWebApp.Data;
-using SIS.MvcFramework;
-
-namespace MishMashWebApp.Controllers
+﻿namespace MishMashWebApp.Controllers
 {
+    using Data;
+    using SIS.MvcFramework;
+
     public abstract class BaseController : Controller
     {
         protected BaseController()

@@ -1,4 +1,5 @@
-﻿using SIS.MvcFramework.Logger;
+﻿using System.IO;
+using SIS.MvcFramework.Logger;
 using SIS.MvcFramework.Logger.Contracts;
 
 namespace SIS.MvcFramework
@@ -52,18 +53,48 @@ namespace SIS.MvcFramework
                 var methods = controller.GetMethods()
                     .Where(m => m.CustomAttributes.Any(ca => ca.AttributeType.IsSubclassOf(typeof(HttpAttribute))));
                    
-                foreach (var method in methods)
+                foreach (var methodInfo in methods)
                 {
                     var httpAttribute =
-                        (HttpAttribute)method.GetCustomAttributes(true).FirstOrDefault(ca => ca.GetType().IsSubclassOf(typeof(HttpAttribute)));
+                        (HttpAttribute)methodInfo.GetCustomAttributes(true).FirstOrDefault(ca => ca.GetType().IsSubclassOf(typeof(HttpAttribute)));
 
                     if (httpAttribute == null)
                     {
                         continue;
                     }
 
-                    routingTable.Add(httpAttribute.Method, httpAttribute.Path, (request => ExecuteAction(controller, method, request, serviceCollection)));
+                    var path = httpAttribute.Path;
+                    var method = httpAttribute.Method;
+
+                    if (path == null)
+                    {
+                        var controllerName = controller.Name;
+                        if (controllerName.EndsWith("Controller"))
+                        {
+                            controllerName = controllerName.Substring(0, controllerName.Length - "Controller".Length);
+                        }
+                        var actionName = methodInfo.Name;
+                        path = $"/{controllerName}/{actionName}";
+                        //TODO:implemented via controller and action
+                    }
+                    else if (!path.StartsWith("/"))
+                    {
+                        path = "/" + path;
+                    }
+
+                    routingTable.Add(method, path, (request => ExecuteAction(controller, methodInfo, request, serviceCollection)));
+                    Console.WriteLine($"Registered route: {controller.Name}.{methodInfo.Name} => {method} => {path}");
                 }
+            }
+
+            if (!routingTable.Routes[HttpRequestMethod.GET].ContainsKey("/") 
+            
+                && routingTable.Routes[HttpRequestMethod.GET].ContainsKey("/Home/Index"))
+            {
+                routingTable.Routes[HttpRequestMethod.GET]["/"] = request =>
+                    routingTable.Routes[HttpRequestMethod.GET]["/Home/Index"](request);
+
+                Console.WriteLine($"Registered route: reuse /Home/Index => {HttpRequestMethod.GET} => /");
             }
         }
 
@@ -79,7 +110,7 @@ namespace SIS.MvcFramework
             controllerInstance.UserCookieService = serviceCollection.CreateInstance<IUserCookieService>();
             controllerInstance.HashService = serviceCollection.CreateInstance<IHashService>();
             controllerInstance.ViewEngine = new ViewEngine.ViewEngine();
-
+            
             var parameters = GetMethodParameters(methodInfo, request, serviceCollection).ToArray();
 
             var httpResponse = methodInfo.Invoke(controllerInstance, parameters) as IHttpResponse;

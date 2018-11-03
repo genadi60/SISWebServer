@@ -1,7 +1,7 @@
-﻿using MishMashWebApp.Models.Enums;
-
-namespace MishMashWebApp.InputModels.Users
+﻿namespace MishMashWebApp.InputModels.Users
 {
+    using Models.Enums;
+
     public class RegisterInputModel
     {
         public string Title { get; set; } = "Register";

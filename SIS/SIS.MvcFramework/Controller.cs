@@ -1,4 +1,10 @@
-﻿namespace SIS.MvcFramework
+﻿using System;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
+using SIS.HTTP.Cookies.Contracts;
+using SIS.MvcFramework.ViewEngine.Contracts;
+using SIS.MvcFramework.ViewModel;
+
+namespace SIS.MvcFramework
 {
     using System.Collections.Generic;
     using System.Text;
@@ -11,7 +17,6 @@
     using HTTP.Responses.Contracts;
     using HTTP.Sessions;
     using Services.Contracts;
-    using ViewModels;
 
     public abstract class Controller
     {
@@ -19,14 +24,36 @@
 
         protected Controller()
         {
-            Response = new HttpResponse {StatusCode = HttpResponseStatusCode.OK};
+            Response = new HttpResponse { StatusCode = HttpResponseStatusCode.OK };
             var session = HttpSessionStorage.GetSession("tempData");
             if (!session.ContainsParameter("tempData"))
             {
                 session.AddParameter("tempData", new Dictionary<string, string>());
-               
+
             }
             TempData = (Dictionary<string, string>)session.GetParameter("tempData");
+        }
+
+        public MvcUserInfo User => GetUserData(this.UserCookieService);
+
+        public MvcUserInfo GetUserData(IUserCookieService cookieService)
+        {
+            if (!Request.Session.ContainsParameter(".auth_cake"))
+            {
+                return new MvcUserInfo();
+            }
+
+            var sessionParameter = (string)Request.Session.GetParameter(".auth_cake");
+
+            try
+            {
+                var userName = cookieService.GetUserData(sessionParameter);
+                return userName;
+            }
+            catch (Exception)
+            {
+                return new MvcUserInfo();
+            }
         }
 
         public IUserCookieService UserCookieService { get; internal set; }
@@ -41,46 +68,32 @@
 
         protected Dictionary<string, string> TempData { get; set; }
 
-        protected string User
+
+        private string ProcessFileHtml<T>(string viewName, T model, string layout = GlobalConstants.Layout)
+        where T : class
         {
-            get
-            {
-                string userName = null;
 
-                if (!Request.Session.ContainsParameter(".auth_cake") && !Request.Cookies.ContainsCookie(".auth_cake"))
-                {
-                    return null;
-                }
-
-                if (Request.Session.ContainsParameter(".auth_cake"))
-                {
-                    userName = UserCookieService.GetUserData(Request.Session.GetParameter(".auth_cake").ToString());
-                }
-                
-                return userName;
-            }
-        }
-
-        private string ProcessFileHtml<T>(string viewName, T model,  string layout = GlobalConstants.Layout)
-        {
             if ("/".Equals(viewName))
             {
                 viewName = "/" + GlobalConstants.HomeIndex;
             }
-            else if (!viewName.StartsWith("/"))
-            {
-                viewName = "/" + viewName;
-            }
-            
-            var fileName = $"{GlobalConstants.View}{viewName}{GlobalConstants.Html}";
 
-            var fileHtml = System.IO.File.ReadAllText(fileName);
+            var fileName = viewName;
+
+            if (!viewName.StartsWith("/"))
+            {
+                fileName = "/" + viewName;
+            }
+
+            var currentFileName = $"{GlobalConstants.View}{fileName}{GlobalConstants.Html}";
+
+            var fileHtml = System.IO.File.ReadAllText(currentFileName);
 
             var layoutHtml = System.IO.File.ReadAllText($"{GlobalConstants.View}/{layout}{GlobalConstants.Html}");
 
-            layoutHtml = layoutHtml.Replace(ContentPlaceholder, fileHtml);
+            var allContent = layoutHtml.Replace(ContentPlaceholder, fileHtml);
 
-            var cSharpContent = ViewEngine.GetHtml(viewName, layoutHtml, model, User);
+            var cSharpContent = ViewEngine.GetHtml(layout, allContent, model, User);
 
             return cSharpContent;
         }
@@ -129,8 +142,8 @@
                     viewName = "Home/Index";
                 }
             }
-            
-            var content = ProcessFileHtml(viewName, model);
+
+            var content = ProcessFileHtml(viewName, model, layout);
 
             PrepareHtmlResult(content);
 
@@ -143,38 +156,38 @@
         }
 
         protected IHttpResponse View<T>(T model = null, string layout = GlobalConstants.Layout)
-            where  T : class
+            where T : class
         {
-           return View(null, model, layout);
+            return View(null, model, layout);
         }
 
         protected IHttpResponse BadRequestError(string errorMessage)
         {
             var content = PrepareErrorData(HttpResponseStatusCode.Bad_Request, errorMessage);
-            
+
             PrepareHtmlResult(content);
-            
+
             return Response;
         }
 
         protected IHttpResponse ServerError(string errorMessage)
         {
             var content = PrepareErrorData(HttpResponseStatusCode.Internal_Server_Error, errorMessage);
-            
+
             PrepareHtmlResult(content);
-            
+
             return Response;
         }
 
         public IHttpResponse NotFound()
         {
             var content = PrepareErrorData(HttpResponseStatusCode.Not_Found, GlobalConstants.NotFoundPage);
-            
+
             PrepareHtmlResult(content);
 
             return Response;
         }
-        
+
         protected void SetDefaultTempData()
         {
             TempData["searchTerm"] = null;

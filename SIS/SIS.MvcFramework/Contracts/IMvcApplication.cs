@@ -1,7 +1,6 @@
 ﻿namespace SIS.MvcFramework.Contracts
 {
     using Services.Contracts;
-    using WebServer.Routing;
 
 
     public interface IMvcApplication

@@ -5,10 +5,6 @@ namespace MishMashWebApp.Data
 {
     public class MishMashDbContext : DbContext
     {
-        public MishMashDbContext(DbContextOptions options) : base(options)
-        {
-            
-        }
         public MishMashDbContext()
         {
             
@@ -20,15 +16,13 @@ namespace MishMashWebApp.Data
 
         public DbSet<Tag> Tags { get; set; }
 
+        public DbSet<UserChannel> UserChannel { get; set; }
+
         protected override void OnConfiguring(DbContextOptionsBuilder builder)
         {
-            builder.UseSqlServer("Server=.;Database=MishMash;Integrated Security=True;");
             builder.UseLazyLoadingProxies();
+            builder.UseSqlServer("Server=.;Database=MishMash;Integrated Security=True;");
         }
-
-        protected override void OnModelCreating(ModelBuilder builder)
-        {
-           
-        }
+        
     }
 }

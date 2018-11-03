@@ -14,41 +14,42 @@
 
     public class ViewEngine : IViewEngine
     {
-        public string GetHtml<T>(string viewName, string viewCode, T model, string user)
+        public string GetHtml<T>(string viewName, string viewCode, T model, MvcUserInfo user = null)
         {
             var viewTypeName = viewName.Replace("/", "_") + "View";
 
             var csharpMethodBody = GenerateCSharpMethodBody(viewCode);
             //1.viewCode => C# code
-            string viewCSharpCode = $@"
+            string viewCSharpCode = @"
 using System;
 using System.Linq;
 using System.Text;
 using System.Collections;
 using System.Collections.Generic;
+using SIS.MvcFramework;
 using SIS.MvcFramework.ViewEngine;
 using SIS.MvcFramework.ViewEngine.Contracts;
-using {typeof(T).Namespace};
-namespace MyAppView
-{{
-    public class {viewTypeName} : IView<{typeof(T).FullName.Replace("+", ".")}>
-    {{
-        public string GetHtml({typeof(T).FullName.Replace("+", ".")} model, string user)
-        {{
+using " + typeof(T).Namespace + @";
+namespace MyAppViews
+{
+    public class " + viewTypeName + @" : IView<" + typeof(T).FullName.Replace("+", ".") + @">
+    {
+        public string GetHtml(" + typeof(T).FullName.Replace("+", ".") + @" model, MvcUserInfo user)
+        {
             var html = new StringBuilder();
 
             var Model = model;
             var User = user;
 
-            {csharpMethodBody}
+            " + csharpMethodBody + @"
 
             string result = html.ToString().TrimEnd();
             
             return result;
-        }}
-    }}
-}}";
-            var instanceOfViewClass = GetInstance(viewCSharpCode, $"MyAppView.{viewTypeName}", typeof(T)) as IView<T>;
+        }
+    }
+}";
+            var instanceOfViewClass = GetInstance(viewCSharpCode, "MyAppViews." + viewTypeName, typeof(T)) as IView<T>;
 
             if (instanceOfViewClass == null)
             {
@@ -68,15 +69,17 @@ namespace MyAppView
                 .AddReferences(MetadataReference.CreateFromFile(typeof(IEnumerable<>).GetTypeInfo().Assembly.Location))
                 .AddReferences(MetadataReference.CreateFromFile(typeof(Enumerable).GetTypeInfo().Assembly.Location))
                 .AddReferences(MetadataReference.CreateFromFile(Assembly.Load(new AssemblyName("mscorlib")).Location))
-                .AddReferences(MetadataReference.CreateFromFile(viewModelType.Assembly.Location))
-                .AddSyntaxTrees(CSharpSyntaxTree.ParseText(viewCSharpCode));
+                .AddReferences(MetadataReference.CreateFromFile(Assembly.Load(new AssemblyName("netstandard")).Location))
+                .AddReferences(MetadataReference.CreateFromFile(viewModelType.Assembly.Location));
+                
 
             var netstandardReferences = Assembly.Load(new AssemblyName("netstandard")).GetReferencedAssemblies();
             foreach (var netstandardReference in netstandardReferences)
             {
-                compilation = compilation.AddReferences(
-                    MetadataReference.CreateFromFile(Assembly.Load(netstandardReference).Location));
+                compilation = compilation.AddReferences(MetadataReference.CreateFromFile(Assembly.Load(netstandardReference).Location));
             }
+
+            compilation = compilation.AddSyntaxTrees(CSharpSyntaxTree.ParseText(viewCSharpCode));
 
             using (var ms = new MemoryStream())
             {
@@ -100,9 +103,9 @@ namespace MyAppView
                 ms.Seek(0, SeekOrigin.Begin);
                 var assembly = Assembly.Load(ms.ToArray());
                 var viewType = assembly.GetType(typeName);
-                var instance = Activator.CreateInstance(viewType);
+                return Activator.CreateInstance(viewType);
 
-                return instance;
+                //return instance;
             }
         }
 
@@ -116,7 +119,14 @@ namespace MyAppView
                 var trimmedLine = line.Trim();
                 var htmlLine = line;
 
-                if (trimmedLine.StartsWith("{") || trimmedLine.StartsWith("}")
+                if (line.Trim().StartsWith("{") && line.Trim().EndsWith("}"))
+                {
+                    var cSharpLine = line.Trim();
+                    cSharpLine = cSharpLine.Substring(1, cSharpLine.Length - 2);
+                    sb.AppendLine(cSharpLine);
+                }
+
+                else if (trimmedLine.StartsWith("{") || trimmedLine.StartsWith("}")
                     || trimmedLine.StartsWith("@"))
                 {
                     if (trimmedLine.StartsWith("@"))
@@ -129,7 +139,7 @@ namespace MyAppView
                 else
                 {
                     htmlLine = htmlLine.Replace("\"", "\\\"");
-                    var pattern = @"@(?<value>[^< \\]+)";
+                    var pattern = @"@(?<value>[^\s&\+=()<\\!]+)";
                     var regex = new Regex(pattern);
                     var matches = regex.Matches(htmlLine).ToArray();
                     if (matches.Length > 0)

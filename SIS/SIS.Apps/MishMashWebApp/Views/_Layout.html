@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport"
           content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
-    <title>@Model.Title</title>
+    <title>Mish-Mash Media Centre</title>
     <link rel="stylesheet" type="text/css" href="/reset-css.css">
     <link rel="stylesheet" type="text/css" href="/bootstrap.min.css">
     <link rel="stylesheet" type="text/css" href="/style.css">
@@ -23,19 +23,19 @@
                         <li class="nav-item">
                             <a class="nav-link nav-link-white active" href="/">Home</a>
                         </li>
-                        @if (User != null)
+                        @if (User.IsLoggedIn)
                         {
                         <li class="nav-item">
                             <a class="nav-link nav-link-white active" href="/Channels/Followed">My Channels</a>
                         </li>
-                        @if (User != null)
+                        @if (User.Role == "Admin")
                         {
                         <li class="nav-item">
                             <a class="nav-link nav-link-white active" href="/Channels/Create">Create channel</a>
                         </li>
                         }
                         <li class="nav-item">
-                            <a class="nav-link nav-link-white active" href="/Users/Logout">Logout (User.Info)</a>
+                            <a class="nav-link nav-link-white active" href="/Users/Logout">Logout @User.Username</a>
                         </li>
                         }
                         @else

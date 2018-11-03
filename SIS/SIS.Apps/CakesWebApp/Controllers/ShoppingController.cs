@@ -8,7 +8,7 @@ using CakesWebApp.ViewModels.Shopping;
 using CakesWebApp.ViewModels.User;
 using SIS.HTTP.Responses.Contracts;
 using SIS.MvcFramework.Attributes;
-using SIS.MvcFramework.ViewModels;
+using SIS.MvcFramework.ViewModel;
 
 namespace CakesWebApp.Controllers
 {
@@ -71,7 +71,7 @@ namespace CakesWebApp.Controllers
         [HttpPost("/shopping/finishOrder")]
         public IHttpResponse FinishOrder()
         {
-            var username = User;
+            var username = User.Username;
             
             if (username == null)
             {

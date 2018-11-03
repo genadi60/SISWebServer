@@ -8,12 +8,8 @@ namespace SIS.MvcFramework.Attributes
         public string Path { get; }
         public abstract HttpRequestMethod Method { get; }
 
-        protected HttpAttribute(string path)
+        protected HttpAttribute(string path = null)
         {
-            if (!path.StartsWith("/"))
-            {
-                path = "/" + path;
-            }
             Path = path;
         }
     }

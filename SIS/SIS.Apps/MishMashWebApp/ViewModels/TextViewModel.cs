@@ -2,8 +2,14 @@
 {
     public class TextViewModel
     {
-        public string Title {get; set; } = "Finish Order";
+        public TextViewModel(string message, string title = "Message")
+        {
+            Message = message;
+            Title = title;
+        }
 
-        public string Message { get; set;} = "The order has been executed successfully.";
+        public string Title { get; set; }
+
+        public string Message { get; set;}
     }
 }

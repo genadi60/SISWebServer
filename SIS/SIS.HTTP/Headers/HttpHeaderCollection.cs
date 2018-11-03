@@ -17,7 +17,7 @@
 
         public void Add(HttpHeader header)
         {
-            _headers.Add(header.Key, header);
+            _headers[header.Key] = header;
         }
 
         public bool ContainsHeader(string key)

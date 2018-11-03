@@ -1,8 +1,9 @@
-﻿using MishMashWebApp.Models.Enums;
-using System.Collections.Generic;
-
-namespace MishMashWebApp.Models
+﻿namespace MishMashWebApp.Models
 {
+    using System.Collections.Generic;
+
+    using Enums;
+
     public class Channel
     {
         public int Id { get; set; }

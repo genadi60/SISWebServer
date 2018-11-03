@@ -1,4 +1,4 @@
-﻿namespace SIS.MvcFramework.ViewModels
+﻿namespace SIS.MvcFramework.ViewModel
 {
     public class ErrorViewModel
     {

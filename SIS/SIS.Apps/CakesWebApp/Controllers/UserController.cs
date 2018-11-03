@@ -2,7 +2,7 @@
 using CakesWebApp.ViewModels.User;
 using SIS.HTTP.Responses.Contracts;
 using SIS.MvcFramework.Attributes;
-using SIS.MvcFramework.ViewModels;
+using SIS.MvcFramework.ViewModel;
 
 namespace CakesWebApp.Controllers
 {
@@ -17,13 +17,13 @@ namespace CakesWebApp.Controllers
         [HttpGet("user/profile")]
         public IHttpResponse GetProfile()
         {
-            if (User == null)
+            if (User.Username == null)
             {
                 var errorMessage = "You must first login.";
                 return View("/error", new ErrorViewModel(errorMessage));
             }
 
-            var model = _userService.Profile(User, Db);
+            var model = _userService.Profile(User.Username, Db);
 
             return View("user/profile", model);
         }
@@ -31,7 +31,7 @@ namespace CakesWebApp.Controllers
         [HttpGet("/user/hello")]
         public IHttpResponse HelloUser(HelloViewModel model)
         {
-            model.Username = User;
+            model.Username = User.Username;
             return View("/user/hello", model);
         }
     }
